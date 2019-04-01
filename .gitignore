@@ -2,4 +2,9 @@
 TestPaperManager/migrations/0002_auto_20190401_1049.py
 *.pyc
 *.pyc
+.idea/deployment.xml
+.idea/workspace.xml
+appfront/package-lock.json
+appfront/package.json
+*.pyc
 *.pyc
