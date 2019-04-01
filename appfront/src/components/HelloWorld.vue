@@ -92,6 +92,7 @@
       }
     },
     mounted() {
+
       this.$http.get('http://127.0.0.1:8000/api/test')
         .then((response) => {
           var res = JSON.parse(response.bodyText)
