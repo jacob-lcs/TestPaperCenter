@@ -11,6 +11,9 @@ class User(models.Model):
     password = models.CharField('密码', max_length=200)
     identity = models.CharField('身份', max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class School(models.Model):
     class Meta:
@@ -18,6 +21,9 @@ class School(models.Model):
         verbose_name_plural = verbose_name
 
     name = models.CharField('学校名称', max_length=200)
+
+    def __str__(self):
+        return self.name
 
 
 class QuestionTypes(models.Model):
@@ -27,6 +33,9 @@ class QuestionTypes(models.Model):
 
     name = models.CharField('题目类型', max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class QuestionDifficulty(models.Model):
     class Meta:
@@ -34,6 +43,9 @@ class QuestionDifficulty(models.Model):
         verbose_name_plural = verbose_name
 
     name = models.CharField('题目难度', max_length=200)
+
+    def __str__(self):
+        return self.name
 
 
 class Subject(models.Model):
@@ -43,6 +55,9 @@ class Subject(models.Model):
 
     name = models.CharField('科目名称', max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 class Grade(models.Model):
     class Meta:
@@ -50,6 +65,9 @@ class Grade(models.Model):
         verbose_name_plural = verbose_name
 
     name = models.CharField('年级', max_length=200)
+
+    def __str__(self):
+        return self.name
 
 
 class KnowledgePoint(models.Model):
@@ -61,6 +79,9 @@ class KnowledgePoint(models.Model):
     subject_name = models.ForeignKey(to='Subject', on_delete=models.CASCADE, verbose_name='科目名称')
     parent = models.ForeignKey(to='KnowledgePoint', on_delete=models.CASCADE, verbose_name='上级知识点', null=True,
                                blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Question(models.Model):
@@ -77,3 +98,6 @@ class Question(models.Model):
     grade = models.ForeignKey(to='Grade', on_delete=models.CASCADE, verbose_name='年级名称')
     paper_name = models.CharField('试卷名称', max_length=200)
     knowledge_point = models.ManyToManyField(to='KnowledgePoint', related_name='question', verbose_name='知识点')
+
+    def __str__(self):
+        return self.stem

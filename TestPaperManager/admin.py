@@ -9,12 +9,46 @@ from .models import Subject
 from .models import User
 
 
-# Register your models here.
-admin.site.register(Grade)
-admin.site.register(KnowledgePoint)
-admin.site.register(Question)
-admin.site.register(QuestionDifficulty)
-admin.site.register(QuestionTypes)
-admin.site.register(School)
-admin.site.register(Subject)
-admin.site.register(User)
+@admin.register(Grade)
+class GradeAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+
+
+@admin.register(KnowledgePoint)
+class KnowledgePointAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'subject_name', 'parent']
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ['id', 'stem', 'answer', 'type', 'difficulty', 'school_name', 'subject_name', 'grade', 'paper_name']
+    pass
+
+
+@admin.register(QuestionDifficulty)
+class QuestionDifficultyAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+    pass
+
+
+@admin.register(QuestionTypes)
+class QuestionTypesAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+    pass
+
+
+@admin.register(School)
+class SchoolAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+    pass
+
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name']
+    pass
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'password', 'identity']
