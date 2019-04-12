@@ -3,6 +3,75 @@ from django.db import models
 
 # Create your models here.
 class User(models.Model):
-    name = models.CharField(max_length=200)
-    password = models.CharField(max_length=200)
-    identity = models.CharField(max_length=200)
+    class Meta:
+        verbose_name = '用户'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('用户名', max_length=200)
+    password = models.CharField('密码', max_length=200)
+    identity = models.CharField('身份', max_length=200)
+
+
+class School(models.Model):
+    class Meta:
+        verbose_name = '学校'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('学校名称', max_length=200)
+
+
+class QuestionTypes(models.Model):
+    class Meta:
+        verbose_name = '题目类型'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('题目类型', max_length=200)
+
+
+class QuestionDifficulty(models.Model):
+    class Meta:
+        verbose_name = '题目难度'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('题目难度', max_length=200)
+
+
+class Subject(models.Model):
+    class Meta:
+        verbose_name = '科目'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('科目名称', max_length=200)
+
+
+class Grade(models.Model):
+    class Meta:
+        verbose_name = '年级'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('年级', max_length=200)
+
+
+class KnowledgePoint(models.Model):
+    class Meta:
+        verbose_name = '知识点'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('知识点', max_length=200)
+    subject_name = models.ForeignKey(to='Subject', max_length=200, verbose_name='科目名称')
+
+
+class Question(models.Model):
+    class Meta:
+        verbose_name = '题目'
+        verbose_name_plural = verbose_name
+
+    stem = models.CharField('题干', max_length=2000)
+    answer = models.CharField('答案', max_length=1000)
+    type = models.ForeignKey(to='QuestionTypes', on_delete=models.CASCADE, verbose_name='题目类型')
+    difficulty = models.ForeignKey(to='QuestionDifficulty', on_delete=models.CASCADE, verbose_name='题目难度')
+    school_name = models.ForeignKey(to='School', on_delete=models.CASCADE, verbose_name='学校名称')
+    subject_name = models.ForeignKey(to='Subject', on_delete=models.CASCADE, verbose_name='学科名称')
+    grade = models.ForeignKey(to='Grade', on_delete=models.CASCADE, verbose_name='年级名称')
+    paper_name = models.CharField('试卷名称', max_length=200)
+    knowledge_point = models.ManyToManyField(to='KnowledgePoint', related_name='question', verbose_name='知识点')
