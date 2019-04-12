@@ -37,16 +37,16 @@
     },
     methods: {
       login_in() {
-        let that = this
+        let that = this;
         $.ajax({
-          url: "/api/login",
+          url: that.$site + "api/login",
           dataType: "json",
           data: {
             name: this.per_name,
             psw: this.per_password
           },
           success: function (data) {
-            if (data['res'] == "no") {
+            if (data['res'] === "no") {
               that.$message({
                 message: '用户名或密码错误',
                 type: 'warning'
