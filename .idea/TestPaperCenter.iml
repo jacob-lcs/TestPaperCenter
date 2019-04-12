@@ -21,7 +21,7 @@
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
     <option name="TEMPLATE_FOLDERS">
       <list>
-        <option value="$MODULE_DIR$/../TestPaperCenter\templates" />
+        <option value="$MODULE_DIR$/appfront/node_modules/istanbul-reports/lib/html/templates" />
       </list>
     </option>
   </component>
