@@ -7,6 +7,7 @@ from .models import QuestionTypes
 from .models import School
 from .models import Subject
 from .models import User
+from .models import Paper
 
 
 @admin.register(Grade)
@@ -52,3 +53,8 @@ class SubjectAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'password', 'identity']
+
+
+@admin.register(Paper)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'year']

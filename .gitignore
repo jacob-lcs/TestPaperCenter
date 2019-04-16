@@ -2,3 +2,7 @@
 TestPaperManager/migrations
 *.pyc
 .idea/
+*.pyc
+*.pyc
+TestPaperManager/__pycache__/models.cpython-36.pyc
+TestPaperManager/__pycache__/urls.cpython-36.pyc

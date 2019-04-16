@@ -1,28 +1,25 @@
 <template>
   <div class="all">
-    <el-row class="title">
-      <p>满分题库系统</p>
-    </el-row>
-    <el-row>
-      <el-input
-        placeholder="请输入账号"
-        v-model="per_name"
-        clearable
-        class="in_name">
-      </el-input>
-    </el-row>
-    <el-row>
-      <el-input
-        placeholder="请输入密码"
-        v-model="per_password"
-        type="password"
-        clearable
-        class="in_pass">
-      </el-input>
-    </el-row>
-    <el-row>
-      <el-button round class="btn_login" @click="login_in">登陆</el-button>
-    </el-row>
+    <p class="title">满分题库系统</p>
+    <br>
+    <Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
+      <FormItem prop="user">
+        <Input type="text" v-model="formInline.user" placeholder="Username" class="in_text">
+          <Icon type="ios-person-outline" slot="prepend"></Icon>
+        </Input>
+      </FormItem>
+      <br>
+      <FormItem prop="password">
+        <Input type="password" v-model="formInline.password" placeholder="Password" class="in_text">
+          <Icon type="ios-lock-outline" slot="prepend"></Icon>
+        </Input>
+      </FormItem>
+      <br>
+      <FormItem>
+        <Button type="primary" @click="handleSubmit('formInline')">登录</Button>
+      </FormItem>
+    </Form>
+
   </div>
 </template>
 
@@ -31,36 +28,52 @@
     name: "login",
     data() {
       return {
-        per_name: '',
-        per_password: ''
+        formInline: {
+          user: '',
+          password: ''
+        },
+        ruleInline: {
+          user: [
+            {required: true, message: 'Please fill in the user name', trigger: 'blur'}
+          ],
+          password: [
+            {required: true, message: 'Please fill in the password.', trigger: 'blur'},
+            {type: 'string', min: 4, message: 'The password length cannot be less than 4 bits', trigger: 'blur'}
+          ]
+        }
       }
     },
     methods: {
-      login_in() {
+      handleSubmit(name) {
         let that = this;
-        $.ajax({
-          url: that.$site + "api/login",
-          dataType: "json",
-          data: {
-            name: this.per_name,
-            psw: this.per_password
-          },
-          success: function (data) {
-            if (data['res'] === "no") {
-              that.$message({
-                message: '用户名或密码错误',
-                type: 'warning'
-              });
-            } else {
-              that.$router.push({
-                name: "home"
-              });
-              sessionStorage.setItem('per_name', that.per_name);
-              sessionStorage.setItem('identity', data['identity'])
-            }
+        this.$refs[name].validate((valid) => {
+          if (valid) {
+            $.ajax({
+              url: that.$site + "api/login",
+              dataType: "json",
+              data: {
+                name: this.formInline.user,
+                psw: this.formInline.password
+              },
+              success: function (data) {
+                if (data['res'] === "no") {
+                  that.$Message.warning('用户名或密码错误');
+                } else {
+                  that.$router.push({
+                    name: "home"
+                  });
+                  sessionStorage.setItem('per_name', that.per_name);
+                  sessionStorage.setItem('identity', data['identity'])
+                }
+              }
+
+            });
+          } else {
+            this.$Message.error('Fail!');
           }
         })
-      }
+      },
+
     }
   }
 </script>
@@ -81,12 +94,13 @@
   }
 
   .title {
-    padding-top: 23vh;
-    font-size: 30px;
+    padding-top: 200px;
+    font-size: 50px;
   }
 
   .all {
     background-image: url("../assets/img/bg.jpg");
     height: 97vh;
   }
+
 </style>

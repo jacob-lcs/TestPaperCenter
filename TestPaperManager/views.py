@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
-from .models import User
+from .models import User, Paper
 
 
 @require_http_methods(["GET"])
@@ -16,3 +16,13 @@ def login(request):
     else:
         response = {'res': 'no'}
     return JsonResponse(response)
+
+
+@require_http_methods(["GET"])
+def add_paper(request):
+    paper_name = request.GET.get('paper_name')
+    paper_year = request.GET.get('paper_year')
+
+    Paper(name=paper_name, year=paper_year).save()
+    response = {'res': 'yes'}
+    return JsonResponse(response, safe=False)

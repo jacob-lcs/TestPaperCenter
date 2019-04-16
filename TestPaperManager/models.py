@@ -70,6 +70,18 @@ class Grade(models.Model):
         return self.name
 
 
+class Paper(models.Model):
+    class Meta:
+        verbose_name = '试卷'
+        verbose_name_plural = verbose_name
+
+    name = models.CharField('试卷名称', max_length=200)
+    year = models.CharField('试卷年份', max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
 class KnowledgePoint(models.Model):
     class Meta:
         verbose_name = '知识点'
@@ -96,7 +108,7 @@ class Question(models.Model):
     school_name = models.ForeignKey(to='School', on_delete=models.CASCADE, verbose_name='学校名称')
     subject_name = models.ForeignKey(to='Subject', on_delete=models.CASCADE, verbose_name='学科名称')
     grade = models.ForeignKey(to='Grade', on_delete=models.CASCADE, verbose_name='年级名称')
-    paper_name = models.CharField('试卷名称', max_length=200)
+    paper_name = models.ForeignKey(to='Paper', on_delete=models.CASCADE, verbose_name='试卷名称')
     knowledge_point = models.ManyToManyField(to='KnowledgePoint', related_name='question', verbose_name='知识点')
 
     def __str__(self):
