@@ -59,10 +59,8 @@
                 if (data['res'] === "no") {
                   that.$Message.warning('用户名或密码错误');
                 } else {
-                  that.$router.push({
-                    name: "home"
-                  });
-                  sessionStorage.setItem('per_name', that.per_name);
+                  that.$router.push("Test_Paper_Import");
+                  sessionStorage.setItem('per_name', that.formInline.user);
                   sessionStorage.setItem('identity', data['identity'])
                 }
               }

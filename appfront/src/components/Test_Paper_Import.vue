@@ -65,6 +65,14 @@
       importpaper_cancel() {
         this.$Message.info('试卷未创建');
       }
+
+    },
+    mounted(){
+      if(sessionStorage.getItem('per_name') == null){
+        this.$router.push("/")
+      }else {
+        console.log(sessionStorage.getItem('per_name'))
+      }
     }
   }
 </script>
