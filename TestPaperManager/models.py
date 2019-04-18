@@ -77,6 +77,7 @@ class Paper(models.Model):
 
     name = models.CharField('试卷名称', max_length=200)
     year = models.CharField('试卷年份', max_length=200)
+    subject = models.CharField('试卷科目', max_length=200)
 
     def __str__(self):
         return self.name

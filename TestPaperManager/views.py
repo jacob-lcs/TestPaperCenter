@@ -22,7 +22,8 @@ def login(request):
 def add_paper(request):
     paper_name = request.GET.get('paper_name')
     paper_year = request.GET.get('paper_year')
+    paper_subject = request.GET.get('paper_subject')
 
-    Paper(name=paper_name, year=paper_year).save()
+    Paper(name=paper_name, year=paper_year, subject=paper_subject).save()
     response = {'res': 'yes'}
     return JsonResponse(response, safe=False)
