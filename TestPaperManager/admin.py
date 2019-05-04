@@ -22,7 +22,7 @@ class KnowledgePointAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'stem', 'answer', 'type', 'difficulty', 'school_name', 'subject_name', 'grade', 'paper_name']
+    list_display = ['id', 'stem', 'answer', 'type', 'difficulty',  'paper_name']
     pass
 
 
@@ -57,4 +57,4 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Paper)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'year']
+    list_display = ['id', 'name', 'year', 'subject_name', 'grade', 'school_name']

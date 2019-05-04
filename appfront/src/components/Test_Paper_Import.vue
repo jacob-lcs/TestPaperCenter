@@ -25,14 +25,21 @@
           <mavon-editor v-model="single_choice_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>选项</Divider>
+
+          <!--     选择题选项    -->
+          <div v-for="select_option in select_options">
+            <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入选项内容...." style="margin-top: 15px"></mavon-editor>
+          </div>
+
           <!--     添加和删除选项     -->
           <div style="margin-top: 15px">
-            <Button shape="circle" icon="md-add" type="primary">添加选项</Button>
-            <Button shape="circle" icon="md-close" type="error">删除选项</Button>
+            <Button shape="circle" icon="md-add" type="primary" @click="add_select_option">添加选项</Button>
+            <Button shape="circle" icon="md-close" type="error" @click="delete_select_option">删除选项</Button>
           </div>
         </div>
       </div>
-      <div slot="footer" style="text-align: center">
+      <div slot="footer" style="text-align: center;">
         <Button type="primary" icon="md-document">保存</Button>
         <Button icon="md-folder">保存并关闭</Button>
         <Button icon="md-flash">保存并新增</Button>
@@ -67,6 +74,7 @@
 </template>
 
 <script>
+
   export default {
     name: "Test_Paper_Import",
     data() {
@@ -198,11 +206,26 @@
             date: '2016-10-04'
           }
         ],
+        select_options:[],  // 选择题选项
+
 
       }
-    }
-    ,
+    },
     methods: {
+
+      // 添加选项
+      add_select_option(){
+          var con = {
+            content: ''
+          };
+          this.select_options.push(con)
+      },
+
+      // 删除选项
+      delete_select_option(){
+        this.select_options.pop()
+      },
+
       add_paper() {
         this.importpaper_flag = true
       }
