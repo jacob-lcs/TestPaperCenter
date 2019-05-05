@@ -93,7 +93,7 @@ class KnowledgePoint(models.Model):
     name = models.CharField('知识点', max_length=200)
     subject_name = models.ForeignKey(to='Subject', on_delete=models.CASCADE, verbose_name='科目名称')
     parent = models.ForeignKey(to='KnowledgePoint', on_delete=models.CASCADE, verbose_name='上级知识点', null=True,
-                               blank=True)
+                               blank=True, related_name='children')
 
     def __str__(self):
         return self.name
