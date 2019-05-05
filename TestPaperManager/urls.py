@@ -3,5 +3,8 @@ from . import views
 
 urlpatterns = [
     url(r'login$', views.login),
-    url(r'add_paper$', views.add_paper)
+    url(r'add_paper$', views.add_paper),
+    url(r'query_difficulty$', views.query_difficulty),
+    url(r'query_types$', views.query_types),
+    url(r'query_knowledgepoint$', views.query_knowledgepoint)
 ]

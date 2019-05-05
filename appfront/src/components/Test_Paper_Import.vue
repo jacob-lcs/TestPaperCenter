@@ -10,8 +10,13 @@
       </p>
       <div>
         <!--  题型选择器  -->
-        <Select v-model="topic" style="width:200px" @on-change="topic_change" transfer="true">
+        <Select v-model="topic" style="width:200px" @on-change="topic_change" transfer="true" placeholder="请选择题目类型">
           <Option v-for="item in topicList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+        </Select>
+        <!--  试题难度选择器  -->
+        <Select v-model="question_difficulty" style="width:200px" transfer="true" placeholder="请选择试题难度">
+          <Option v-for="item in question_difficulty_list" :value="item.value" :key="item.value">{{ item.label }}
+          </Option>
         </Select>
         <br>
         <!--    试卷信息输入    -->
@@ -19,9 +24,16 @@
           <Input size="large" v-model="paper_name" placeholder="请输入试卷名称" style="width: 300px;"/>
           <Input size="large" v-model="paper_year" placeholder="请输入试卷年份" style="width: 300px;margin-left:20px"/>
           <Input size="large" v-model="paper_subject" placeholder="请输入科目" style="width: 300px;margin-left:20px"/>
+
         </div>
         <!--  单选题  -->
         <div v-if="topic === '单选题'">
+          <!--     知识点标签     -->
+          <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close">
+            标签{{ item + 1 }}
+            <Cascader :data="knowledge" :render-format="format"></Cascader>
+          </Tag>
+          <!--     输入题干     -->
           <mavon-editor v-model="single_choice_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>选项</Divider>
@@ -29,7 +41,7 @@
           <!--     选择题选项    -->
           <div v-for="select_option in select_options">
             <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                        placeholder="请输入选项内容...." style="margin-top: 15px"></mavon-editor>
+                          placeholder="请输入选项内容...." style="margin-top: 15px"></mavon-editor>
           </div>
 
           <!--     添加和删除选项     -->
@@ -84,32 +96,7 @@
         paper_year: '',  // 试卷年份
         paper_subject: '', // 试卷科目
         modal12: false,  // 导入试题对话框显示标志位
-        topicList: [      // 可选题型
-          {
-            value: '单选题',
-            label: '单选题'
-          },
-          {
-            value: '多选题',
-            label: '多选题'
-          },
-          {
-            value: '判断题',
-            label: '判断题'
-          },
-          {
-            value: '简答题',
-            label: '简答题'
-          },
-          {
-            value: '计算题',
-            label: '计算题'
-          },
-          {
-            value: '填空题',
-            label: '填空题'
-          }
-        ],  // 可供选择的题型
+        topicList: [],  // 可供选择的题型
         topic: '',  //目前选择的题型
         single_choice_content: '',  // 单选题题干
         columns1: [    // 列名
@@ -206,23 +193,25 @@
             date: '2016-10-04'
           }
         ],
-        select_options:[],  // 选择题选项
-
-
+        select_options: [],  // 选择题选项
+        question_difficulty: '',  // 题目难度
+        question_difficulty_list: [],  // 题目难度列表
+        knowledgepoint_list: [],  // 题目知识点列表
+        knowledge:[],  // 级联选择器的知识点列表
       }
     },
     methods: {
 
       // 添加选项
-      add_select_option(){
-          var con = {
-            content: ''
-          };
-          this.select_options.push(con)
+      add_select_option() {
+        var con = {
+          content: ''
+        };
+        this.select_options.push(con)
       },
 
       // 删除选项
-      delete_select_option(){
+      delete_select_option() {
         this.select_options.pop()
       },
 
@@ -278,23 +267,61 @@
           // 将图片链接改为图片地址
           that.$refs.md.$img2Url(pos, res[0]['url']);
         })
-      }
-      ,
+      },
 
       // 删除图片触发的操作
       $imgDel(pos, $file) {
 
+      },
+
+      knowledgepoint_close() {
+        const index = this.knowledgepoint_list.indexOf(name);
+        this.knowledgepoint_list.splice(index, 1);
       }
 
-    }
-    ,
+    },
+
+
     mounted() {
+      let that = this;
       // 路径保护
       if (sessionStorage.getItem('per_name') == null) {
         this.$router.push("/")
       } else {
         console.log(sessionStorage.getItem('per_name'))
       }
+
+      //  获取题目难度列表
+      $.ajax({
+        url: that.$site + "api/query_difficulty",
+        dataType: "json",
+        data: {},
+        success: function (data) {
+          console.log(data)
+          for (var i = 0; i < data.length; i++) {
+            that.question_difficulty_list.push({
+              value: data[i]['name'],
+              label: data[i]['name']
+            })
+          }
+        }
+      });
+
+      //  获取题目类型列表
+      $.ajax({
+        url: that.$site + "api/query_types",
+        dataType: "json",
+        data: {},
+        success: function (data) {
+          console.log(data);
+          for (var i = 0; i < data.length; i++) {
+            that.topicList.push({
+              value: data[i]['name'],
+              label: data[i]['name']
+            })
+          }
+        }
+      })
     }
   }
 </script>
