@@ -42,18 +42,52 @@
         <div v-if="topic === '单选题'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="single_choice_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>选项</Divider>
 
-          <!--     选择题选项    -->
+          <!-- 选择题选项 -->
           <RadioGroup v-model="question_answer_chosen" vertical>
             <div v-for="select_option in select_options">
               <Radio style="margin-top: 15px" size="large" :label="select_option.label"></Radio>
               <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                            placeholder="请输入选项内容...." style="margin-top: 5px; width: 70vw"></mavon-editor>
+                            placeholder="请输入选项内容...." style="margin-top: 5px;"></mavon-editor>
             </div>
           </RadioGroup>
+          <!--  知识点标签  -->
+          <div>
+            <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
+                 style="margin-top: 15px">
+              {{ item }}
+            </Tag>
+            <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                      transfer style="margin-top: 15px; width: 200px" change-on-select
+                      placeholder="请选择知识点标签"></Cascader>
+          </div>
+
+          <!--     添加和删除选项     -->
+          <div style="margin-top: 15px">
+            <Button shape="circle" icon="md-add" type="primary" @click="add_select_option">添加选项</Button>
+            <Button shape="circle" icon="md-close" type="error" @click="delete_select_option">删除选项</Button>
+          </div>
+        </div>
+
+        <!--  多选题  -->
+        <div v-if="topic === '多选题'">
+
+          <!--     输入题干     -->
+          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
+          <Divider>选项</Divider>
+
+          <!--     选择题选项    -->
+          <CheckboxGroup v-model="multiple_question_chosen" vertical>
+            <div v-for="select_option in select_options">
+              <Checkbox style="margin-top: 15px" size="large" :label="select_option.label"></Checkbox>
+              <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                            placeholder="请输入选项内容...." style="margin-top: 5px;"></mavon-editor>
+            </div>
+          </CheckboxGroup>
           <!--     知识点标签     -->
           <div>
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
@@ -71,6 +105,84 @@
             <Button shape="circle" icon="md-close" type="error" @click="delete_select_option">删除选项</Button>
           </div>
         </div>
+
+        <!--   简答题与计算题     -->
+        <div v-if="topic === '简答题' || topic === '计算题'">
+
+          <!--     输入题干     -->
+          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
+          <Divider>答案</Divider>
+
+          <!--     问答题答案    -->
+          <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入答案...." style="margin-top: 5px;"></mavon-editor>
+          <!--     知识点标签     -->
+          <div>
+            <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
+                 style="margin-top: 15px">
+              {{ item }}
+            </Tag>
+            <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                      transfer style="margin-top: 15px; width: 200px" change-on-select
+                      placeholder="请选择知识点标签"></Cascader>
+          </div>
+
+        </div>
+
+        <!--   填空题     -->
+        <div v-if="topic === '填空题'">
+
+          <!--     输入题干     -->
+          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入题干，空使用”____“表示" style="margin-top: 15px"></mavon-editor>
+          <Divider>答案</Divider>
+
+          <!--     填空题答案    -->
+          <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入填空题答案，答案与答案之间使用”；；“分离" style="margin-top: 5px;"></mavon-editor>
+          <!--     知识点标签     -->
+          <div>
+            <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
+                 style="margin-top: 15px">
+              {{ item }}
+            </Tag>
+            <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                      transfer style="margin-top: 15px; width: 200px" change-on-select
+                      placeholder="请选择知识点标签"></Cascader>
+          </div>
+
+        </div>
+
+        <!--    判断题    -->
+        <div v-if="topic === '判断题'">
+
+          <!--     输入题干     -->
+          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+                        placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
+          <Divider>答案</Divider>
+
+          <!--  判断题答案  -->
+          <div>
+            <i-switch size="large" v-model="true_or_false" true-value="1" false-value="0">
+              <span slot="open">正确</span>
+              <span slot="close">错误</span>
+            </i-switch>
+          </div>
+          <!--     知识点标签     -->
+          <div>
+            <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
+                 style="margin-top: 15px">
+              {{ item }}
+            </Tag>
+            <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                      transfer style="margin-top: 15px; width: 200px" change-on-select
+                      placeholder="请选择知识点标签"></Cascader>
+          </div>
+
+        </div>
+
+
       </div>
       <div slot="footer" style="text-align: center;">
         <Button type="primary" icon="md-document" @click="save_and_close">保存并关闭</Button>
@@ -119,11 +231,11 @@
         modal12: false,  // 导入试题对话框显示标志位
         topicList: [],  // 可供选择的题型
         topic: '',  //目前选择的题型
-        single_choice_content: '',  // 单选题题干
+        question_content: '',  // 题干
         columns1: [    // 列名
           {
-            title: 'Name',
-            key: 'name',
+            title: '题干',
+            key: 'question_content',
             render: (h, params) => {
               return h('div', [
                 h('Icon', {
@@ -136,12 +248,20 @@
             }
           },
           {
-            title: 'Age',
-            key: 'age'
+            title: '答案',
+            key: 'question_answer'
           },
           {
-            title: 'Address',
-            key: 'address'
+            title: '题目类型',
+            key: 'question_type'
+          },
+          {
+            title: '题目难度',
+            key: 'question_difficulty'
+          },
+          {
+            title: '试卷名称',
+            key: 'paper_name'
           },
           {
             title: 'Action',
@@ -188,32 +308,7 @@
             }
           }
         ],
-        data1: [    // 题目数据
-          {
-            name: 'John Brown',
-            age: 18,
-            address: 'New York No. 1 Lake Park',
-            date: '2016-10-03'
-          },
-          {
-            name: 'Jim Green',
-            age: 24,
-            address: 'London No. 1 Lake Park',
-            date: '2016-10-01'
-          },
-          {
-            name: 'Joe Black',
-            age: 30,
-            address: 'Sydney No. 1 Lake Park',
-            date: '2016-10-02'
-          },
-          {
-            name: 'Jon Snow',
-            age: 26,
-            address: 'Ottawa No. 2 Lake Park',
-            date: '2016-10-04'
-          }
-        ],
+        data1: [],// 题目数据
         select_options: [],  // 选择题选项
         question_difficulty: '',  // 题目难度
         question_difficulty_list: [],  // 题目难度列表
@@ -226,6 +321,9 @@
         option_title: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],  // 选项标号
         school_name: '',  // 输入的学校名称
         import_success: false,  // 导入是否成功标志位
+        multiple_question_chosen: [],  // 多选题选择的答案
+        true_or_false: '0',  // 判断题答案
+
       }
     },
     methods: {
@@ -249,31 +347,6 @@
         this.select_options.pop()
       },
 
-
-      // 导入试题dialog点击确定触发的事件
-      importpaper_ok() {
-        let that = this;
-        if (this.paper_name === '' || this.paper_year === '') {
-          that.$Message.info('请填入选项哦')
-        } else {
-          $.ajax({
-            url: that.$site + "api/add_paper",
-            dataType: "json",
-            data: {
-              paper_name: that.paper_name,
-              paper_year: that.paper_year,
-              paper_subject: that.paper_subject
-            },
-            success: function (data) {
-              if (data['res'] === "yes") {
-                that.$Message.info('试卷已创建');
-              } else {
-                that.$Message.info('试卷未创建，请检查网络');
-              }
-            }
-          })
-        }
-      },
 
       // 题型发生变化
       topic_change() {
@@ -314,11 +387,26 @@
         this.modal12 = false
       },
 
-      // 生成答案
-      generate_answer() {
+      // 生成单选题答案
+      generate_signal_selection_answer() {
         let that = this;
         for (var i = 0; i < that.select_options.length; i++) {
           if (that.question_answer_chosen === that.select_options[i]['label']) {
+            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + ".%$@#$%" + that.select_options[i]['content'])
+          } else {
+            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + "." + that.select_options[i]['content'])
+          }
+        }
+        console.log("生成的答案为：", that.question_answer)
+      },
+
+
+      // 生成多选题答案
+      generate_multiple_selection_answer() {
+        let that = this;
+        that.question_answer = '';
+        for (var i = 0; i < that.select_options.length; i++) {
+          if (that.multiple_question_chosen.indexOf(that.select_options[i]['label']) !== -1) {
             that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + ".%$@#$%" + that.select_options[i]['content'])
           } else {
             that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + "." + that.select_options[i]['content'])
@@ -342,7 +430,7 @@
             grade: that.grade,
             subject: that.paper_subject,
             question_type: that.topic,
-            question_stem: that.single_choice_content,
+            question_stem: that.question_content,
             question_answer: that.question_answer,
             question_difficult: that.question_difficulty,
             question_knowledgepoints: kk
@@ -396,7 +484,7 @@
       // 检查单选题输入的内容
       check_signal_select_content() {
         let that = this;
-        if (that.single_choice_content === '') {
+        if (that.question_content === '') {
           that.$Message.warning("请输入题目内容");
           return false;
         } else if (that.question_answer_chosen === '') {
@@ -410,12 +498,44 @@
         }
       },
 
+      // 检查多选题输入的内容
+      check_multiple_select_content() {
+        let that = this;
+        if (that.multiple_choice_content === '') {
+          that.$Message.warning("请输入题目内容");
+          return false;
+        } else if (that.multiple_question_chosen.length === 0) {
+          that.$Message.warning("请选择正确答案");
+          return false;
+        } else if (!that.check_select_options_has_null()) {
+          that.$Message.warning("请输入选项内容");
+          return false;
+        } else {
+          return true;
+        }
+      },
+
+
+      // 检查问答题输入的内容
+      check_essay_question_content() {
+        let that = this;
+        if (that.question_content === '') {
+          that.$Message.warning("请输入题目内容");
+          return false;
+        } else if (that.question_answer === '') {
+          that.$Message.warning("请输入正确答案");
+          return false;
+        } else {
+          return true;
+        }
+      },
+
 
       // 判断选择题选项是否有空
-      check_select_options_has_null(){
+      check_select_options_has_null() {
         let that = this;
-        for(var i=0; i<that.select_options.length; i++){
-          if(that.select_options[i]['content'] === ''){
+        for (var i = 0; i < that.select_options.length; i++) {
+          if (that.select_options[i]['content'] === '') {
             return false;
           }
         }
@@ -430,9 +550,34 @@
           console.log("进入第二级");
           if (that.topic === "单选题") {
             if (that.check_signal_select_content()) {
-              that.generate_answer();
+              that.generate_signal_selection_answer();
               that.import_question();
               that.modal12 = false;
+            }
+          } else if (that.topic === "多选题") {
+            if (that.check_multiple_select_content()) {
+              that.generate_multiple_selection_answer();
+              that.import_question();
+              that.modal12 = false;
+            }
+          } else if (that.topic === "简答题" || that.topic === "计算题" || that.topic === "判断题") {
+            if (that.check_essay_question_content()) {
+              that.import_question();
+              that.modal12 = false;
+            }
+          } else if (that.topic === "判断题") {
+            if(that.question_content === ''){
+              that.$Message.warning("请先输入题干");
+            }else{
+              if (that.true_or_false === '1'){
+                that.question_answer = "正确";
+                that.import_question();
+                that.modal12 = false;
+              } else {
+                that.question_answer = "错误";
+                that.import_question();
+                that.modal12 = false;
+              }
             }
           }
         }
@@ -444,20 +589,52 @@
         let that = this;
         console.log("清空数据....");
         that.question_answer_chosen = '';
-        that.single_choice_content = '';
+        that.question_content = '';
         that.select_options = [];
         that.knowledgepoint_list = [];
         that.question_answer_chosen = '';
         that.question_answer = '';
-
+        that.multiple_question_chosen = [];
+        that.multiple_choice_content = '';
       },
 
 
       // 保存并导入下一个题目
       save_and_dont_close() {
         let that = this;
-        that.generate_answer();
-        that.import_question();
+        console.log(that.multiple_question_chosen);
+        console.log(that.true_or_false);
+        if (that.check_paper_content()) {
+          console.log("进入第二级");
+          if (that.topic === "单选题") {
+            if (that.check_signal_select_content()) {
+              that.generate_signal_selection_answer();
+              that.import_question();
+            }
+          } else if (that.topic === "多选题") {
+            if (that.check_multiple_select_content()) {
+              that.generate_multiple_selection_answer();
+              that.import_question();
+            }
+          } else if (that.topic === "简答题" || that.topic === "计算题" || that.topic === "判断题") {
+            if (that.check_essay_question_content()) {
+              that.import_question();
+            }
+          } else if (that.topic === "判断题") {
+            if(that.question_content === ''){
+              that.$Message.warning("请先输入题干");
+            }else{
+              if (that.true_or_false === '1'){
+                that.question_answer = "正确";
+                that.import_question();
+              } else {
+                that.question_answer = "错误";
+                that.import_question();
+              }
+            }
+          }
+        }
+
       },
 
 
