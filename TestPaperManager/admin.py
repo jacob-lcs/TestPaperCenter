@@ -7,6 +7,7 @@ from .models import QuestionTypes
 from .models import School
 from .models import Subject
 from .models import User
+from .models import Paper
 
 
 @admin.register(Grade)
@@ -21,7 +22,7 @@ class KnowledgePointAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'stem', 'answer', 'type', 'difficulty', 'school_name', 'subject_name', 'grade', 'paper_name']
+    list_display = ['id', 'stem', 'answer', 'type', 'difficulty',  'paper_name']
     pass
 
 
@@ -52,3 +53,8 @@ class SubjectAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'password', 'identity']
+
+
+@admin.register(Paper)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'year', 'subject_name', 'grade', 'school_name']
