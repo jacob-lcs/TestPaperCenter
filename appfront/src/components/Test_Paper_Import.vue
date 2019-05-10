@@ -41,16 +41,16 @@
         <div v-if="topic === '单选题'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="single_choice_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>选项</Divider>
 
-          <!-- 选择题选项 -->
+          <!--     选择题选项    -->
           <RadioGroup v-model="question_answer_chosen" vertical>
             <div v-for="select_option in select_options">
               <Radio style="margin-top: 15px" size="large" :label="select_option.label"></Radio>
               <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                            placeholder="请输入选项内容...." style="margin-top: 5px;"></mavon-editor>
+                            placeholder="请输入选项内容...." style="margin-top: 5px; width: 70vw"></mavon-editor>
             </div>
           </RadioGroup>
           <!--  知识点标签  -->
@@ -285,27 +285,19 @@
         modal12: false,  // 导入试题对话框显示标志位
         topicList: [],  // 可供选择的题型
         topic: '',  //目前选择的题型
-        question_content: '',  // 题干
+        single_choice_content: '',  // 单选题题干
         columns1: [    // 列名
           {
             title: '题干',
             key: 'question_content',
           },
           {
-            title: '答案',
-            key: 'question_answer'
+            title: 'Age',
+            key: 'age'
           },
           {
-            title: '题目类型',
-            key: 'question_type'
-          },
-          {
-            title: '题目难度',
-            key: 'question_difficulty'
-          },
-          {
-            title: '试卷名称',
-            key: 'paper_name'
+            title: 'Address',
+            key: 'address'
           },
           {
             title: 'Action',
@@ -352,7 +344,32 @@
             }
           }
         ],
-        data1: [],// 题目数据
+        data1: [    // 题目数据
+          {
+            name: 'John Brown',
+            age: 18,
+            address: 'New York No. 1 Lake Park',
+            date: '2016-10-03'
+          },
+          {
+            name: 'Jim Green',
+            age: 24,
+            address: 'London No. 1 Lake Park',
+            date: '2016-10-01'
+          },
+          {
+            name: 'Joe Black',
+            age: 30,
+            address: 'Sydney No. 1 Lake Park',
+            date: '2016-10-02'
+          },
+          {
+            name: 'Jon Snow',
+            age: 26,
+            address: 'Ottawa No. 2 Lake Park',
+            date: '2016-10-04'
+          }
+        ],
         select_options: [],  // 选择题选项
         question_difficulty: '',  // 题目难度
         question_difficulty_list: [],  // 题目难度列表
@@ -400,6 +417,31 @@
       },
 
 
+      // 导入试题dialog点击确定触发的事件
+      importpaper_ok() {
+        let that = this;
+        if (this.paper_name === '' || this.paper_year === '') {
+          that.$Message.info('请填入选项哦')
+        } else {
+          $.ajax({
+            url: that.$site + "api/add_paper",
+            dataType: "json",
+            data: {
+              paper_name: that.paper_name,
+              paper_year: that.paper_year,
+              paper_subject: that.paper_subject
+            },
+            success: function (data) {
+              if (data['res'] === "yes") {
+                that.$Message.info('试卷已创建');
+              } else {
+                that.$Message.info('试卷未创建，请检查网络');
+              }
+            }
+          })
+        }
+      },
+
       // 题型发生变化
       topic_change() {
         console.log(this.topic)
@@ -439,8 +481,8 @@
         this.modal12 = false
       },
 
-      // 生成单选题答案
-      generate_signal_selection_answer() {
+      // 生成答案
+      generate_answer() {
         let that = this;
         for (var i = 0; i < that.select_options.length; i++) {
           if (that.question_answer_chosen === that.select_options[i]['label']) {
@@ -482,7 +524,7 @@
             grade: that.grade,
             subject: that.paper_subject,
             question_type: that.topic,
-            question_stem: that.question_content,
+            question_stem: that.single_choice_content,
             question_answer: that.question_answer,
             question_difficult: that.question_difficulty,
             question_knowledgepoints: kk
@@ -536,7 +578,7 @@
       // 检查单选题输入的内容
       check_signal_select_content() {
         let that = this;
-        if (that.question_content === '') {
+        if (that.single_choice_content === '') {
           that.$Message.warning("请输入题目内容");
           return false;
         } else if (that.question_answer_chosen === '') {
@@ -550,44 +592,12 @@
         }
       },
 
-      // 检查多选题输入的内容
-      check_multiple_select_content() {
-        let that = this;
-        if (that.multiple_choice_content === '') {
-          that.$Message.warning("请输入题目内容");
-          return false;
-        } else if (that.multiple_question_chosen.length === 0) {
-          that.$Message.warning("请选择正确答案");
-          return false;
-        } else if (!that.check_select_options_has_null()) {
-          that.$Message.warning("请输入选项内容");
-          return false;
-        } else {
-          return true;
-        }
-      },
-
-
-      // 检查问答题输入的内容
-      check_essay_question_content() {
-        let that = this;
-        if (that.question_content === '') {
-          that.$Message.warning("请输入题目内容");
-          return false;
-        } else if (that.question_answer === '') {
-          that.$Message.warning("请输入正确答案");
-          return false;
-        } else {
-          return true;
-        }
-      },
-
 
       // 判断选择题选项是否有空
-      check_select_options_has_null() {
+      check_select_options_has_null(){
         let that = this;
-        for (var i = 0; i < that.select_options.length; i++) {
-          if (that.select_options[i]['content'] === '') {
+        for(var i=0; i<that.select_options.length; i++){
+          if(that.select_options[i]['content'] === ''){
             return false;
           }
         }
@@ -602,7 +612,7 @@
           console.log("进入第二级");
           if (that.topic === "单选题") {
             if (that.check_signal_select_content()) {
-              that.generate_signal_selection_answer();
+              that.generate_answer();
               that.import_question();
               that.modal12 = false;
             }
@@ -641,13 +651,12 @@
         let that = this;
         console.log("清空数据....");
         that.question_answer_chosen = '';
-        that.question_content = '';
+        that.single_choice_content = '';
         that.select_options = [];
         that.knowledgepoint_list = [];
         that.question_answer_chosen = '';
         that.question_answer = '';
-        that.multiple_question_chosen = [];
-        that.multiple_choice_content = '';
+
       },
 
 
