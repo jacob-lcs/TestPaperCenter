@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <!--  添加试题dialog  -->
     <Modal v-model="modal12" draggable scrollable title="创建试题" width="90vw">
 
@@ -21,7 +20,7 @@
           <Option v-for="item in grade_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
         <!--  科目选择器  -->
-        <Select v-model="paper_subject" style="width:200px" transfer placeholder="请选择科目">
+        <Select v-model="paper_subject" style="width:200px" transfer placeholder="请选择科目" @on-change="subject_change">
           <Option v-for="item in subject_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
         </Select>
         <!--  题型选择器  -->
@@ -55,14 +54,22 @@
             </div>
           </RadioGroup>
           <!--  知识点标签  -->
-          <div>
+          <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
                  style="margin-top: 15px">
               {{ item }}
             </Tag>
-            <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                      transfer style="margin-top: 15px; width: 200px" change-on-select
-                      placeholder="请选择知识点标签"></Cascader>
+            <Row>
+              <div class="inline" style="margin-top: 15px; display: flex">
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
+                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
+                        @click="add_knowledge_point"/>
+                </Poptip>
+              </div>
+            </Row>
           </div>
 
           <!--     添加和删除选项     -->
@@ -89,14 +96,22 @@
             </div>
           </CheckboxGroup>
           <!--     知识点标签     -->
-          <div>
+          <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
                  style="margin-top: 15px">
               {{ item }}
             </Tag>
-            <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                      transfer style="margin-top: 15px; width: 200px" change-on-select
-                      placeholder="请选择知识点标签"></Cascader>
+            <Row>
+              <div class="inline" style="margin-top: 15px; display: flex">
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
+                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
+                        @click="add_knowledge_point"/>
+                </Poptip>
+              </div>
+            </Row>
           </div>
 
           <!--     添加和删除选项     -->
@@ -118,14 +133,22 @@
           <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入答案...." style="margin-top: 5px;"></mavon-editor>
           <!--     知识点标签     -->
-          <div>
+          <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
                  style="margin-top: 15px">
               {{ item }}
             </Tag>
-            <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                      transfer style="margin-top: 15px; width: 200px" change-on-select
-                      placeholder="请选择知识点标签"></Cascader>
+            <Row>
+              <div class="inline" style="margin-top: 15px; display: flex">
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
+                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
+                        @click="add_knowledge_point"/>
+                </Poptip>
+              </div>
+            </Row>
           </div>
 
         </div>
@@ -142,14 +165,22 @@
           <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入填空题答案，答案与答案之间使用”；；“分离" style="margin-top: 5px;"></mavon-editor>
           <!--     知识点标签     -->
-          <div>
+          <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
                  style="margin-top: 15px">
               {{ item }}
             </Tag>
-            <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                      transfer style="margin-top: 15px; width: 200px" change-on-select
-                      placeholder="请选择知识点标签"></Cascader>
+            <Row>
+              <div class="inline" style="margin-top: 15px; display: flex">
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
+                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
+                        @click="add_knowledge_point"/>
+                </Poptip>
+              </div>
+            </Row>
           </div>
 
         </div>
@@ -170,14 +201,22 @@
             </i-switch>
           </div>
           <!--     知识点标签     -->
-          <div>
+          <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
                  style="margin-top: 15px">
               {{ item }}
             </Tag>
-            <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                      transfer style="margin-top: 15px; width: 200px" change-on-select
-                      placeholder="请选择知识点标签"></Cascader>
+            <Row>
+              <div class="inline" style="margin-top: 15px; display: flex">
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
+                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
+                        @click="add_knowledge_point"/>
+                </Poptip>
+              </div>
+            </Row>
           </div>
 
         </div>
@@ -190,7 +229,21 @@
         <Button type="error" icon="ios-close" @click="close_import_paper">关闭</Button>
       </div>
     </Modal>
-
+    <!--  添加知识点对话框  -->
+    <Modal v-model="add_knowledge_point_show" mask scrollable title="添加知识点" :z-index="z_index" :mask-closable="false"
+           @on-ok="add_knowledge_point_commit">
+      <div>
+        请输入知识点：&emsp;&emsp;
+        <Input placeholder="请输入知识点" style="width: auto" v-model="add_knowledge_point_input"/>
+      </div>
+      <div style="margin-top: 25px">
+        请选择上级知识点:&emsp;
+        <Select v-model="select_add_knowledge" style="width:200px" placeholder="请选择上级知识点">
+          <Option v-for="item in knowledgepoint_list_add" :value="item.value" :key="item.value">{{ item.label }}
+          </Option>
+        </Select>
+      </div>
+    </Modal>
 
     <div class="single-choice">
       <Row style="background:#eee;padding:20px">
@@ -209,10 +262,11 @@
           </Card>
         </Col>
       </Row>
+
       <!--   题目表格   -->
       <Table border :columns="columns1" :data="data1"></Table>
-
-
+      <Page :total="data_count" :current="current_page" @on-change="page_change" :page-size="page_count"
+            style="margin-bottom: 20px; margin-top: 20px"/>
     </div>
   </div>
 </template>
@@ -236,16 +290,6 @@
           {
             title: '题干',
             key: 'question_content',
-            render: (h, params) => {
-              return h('div', [
-                h('Icon', {
-                  props: {
-                    type: 'person'
-                  }
-                }),
-                h('strong', params.row.name)
-              ]);
-            }
           },
           {
             title: '答案',
@@ -280,7 +324,7 @@
                   },
                   on: {
                     click: () => {
-                      console.log(params.index)
+                      console.log(params)
                     }
                   }
                 }, 'View'),
@@ -295,10 +339,10 @@
                         title: 'Title',
                         content: '<p>确定删除此题吗</p>',
                         onOk: () => {
-                          this.$Message.info('Clicked ok');
+                          this.delete_question(params.row.question_content, params.row.question_answer, params.row.question_type, params.row.question_difficulty, params.row.paper_name);
                         },
                         onCancel: () => {
-                          this.$Message.info('Clicked cancel');
+
                         }
                       });
                     }
@@ -323,6 +367,14 @@
         import_success: false,  // 导入是否成功标志位
         multiple_question_chosen: [],  // 多选题选择的答案
         true_or_false: '0',  // 判断题答案
+        add_knowledge_point_show: false,  // 添加知识点对话框是否显示
+        select_add_knowledge: '',  // 选择添加的知识点
+        knowledgepoint_list_add: [],  // 选择添加知识点显示的知识点列表
+        add_knowledge_point_input: '',  // 添加的知识点
+        z_index: 1002,  // modal z-index值
+        data_count: 0,  // 数据总数
+        page_count: 30,  // 一页显示的数据数量
+        current_page: 1, // 当前页码
 
       }
     },
@@ -415,7 +467,7 @@
         console.log("生成的答案为：", that.question_answer)
       },
 
-      // 导入试题
+      // 导入试题start
       import_question() {
         console.log("import_question()");
         let that = this;
@@ -566,10 +618,10 @@
               that.modal12 = false;
             }
           } else if (that.topic === "判断题") {
-            if(that.question_content === ''){
+            if (that.question_content === '') {
               that.$Message.warning("请先输入题干");
-            }else{
-              if (that.true_or_false === '1'){
+            } else {
+              if (that.true_or_false === '1') {
                 that.question_answer = "正确";
                 that.import_question();
                 that.modal12 = false;
@@ -621,10 +673,10 @@
               that.import_question();
             }
           } else if (that.topic === "判断题") {
-            if(that.question_content === ''){
+            if (that.question_content === '') {
               that.$Message.warning("请先输入题干");
-            }else{
-              if (that.true_or_false === '1'){
+            } else {
+              if (that.true_or_false === '1') {
                 that.question_answer = "正确";
                 that.import_question();
               } else {
@@ -642,7 +694,124 @@
       select_year_change(year) {
         this.paper_year = year;
         console.log(this.paper_year)
+      },
+
+      // 科目选择器的值发生改变
+      subject_change() {
+        let that = this;
+        //  获取知识点列表
+        $.ajax({
+          url: that.$site + "api/query_knowledgepoint",
+          dataType: "json",
+          data: {
+            subject: that.paper_subject
+          },
+          success: function (data) {
+            console.log(data);
+            for (var i = 0; i < data.length; i++) {
+              that.knowledge.push(data[i])
+            }
+          }
+        });
+
+        //  获取添加知识点时需要的知识点列表
+        $.ajax({
+          url: that.$site + "api/query_knowledge_point_list",
+          dataType: "json",
+          data: {
+            subject: that.paper_subject
+          },
+          success: function (data) {
+            console.log(data);
+            for (var i = 0; i < data.length; i++) {
+              that.knowledgepoint_list_add.push({
+                value: data[i]['name'],
+                label: data[i]['name']
+              })
+            }
+          }
+        });
+      },
+
+      // 添加知识点
+      add_knowledge_point() {
+        console.log("触发事件");
+        this.add_knowledge_point_show = true
+      },
+
+      // 确定添加知识点触发的事件
+      add_knowledge_point_commit() {
+        let that = this;
+        $.ajax({
+          url: that.$site + "api/add_knowledge_points",
+          dataType: "json",
+          data: {
+            child_knowledge_point: that.add_knowledge_point_input,
+            parent_knowledge_point: that.select_add_knowledge,
+            subject: that.paper_subject
+          },
+          success: function (data) {
+            console.log(data);
+            if (data['res'] === "success") {
+              console.log("添加成功");
+              that.$Message.success("添加成功！");
+              that.subject_change();
+            }
+          }
+        });
+      },
+
+      // 页数发生变化
+      page_change(current_page) {
+        let that = this;
+        console.log("页数改变", current_page, that.page_count);
+        this.current_page = current_page;
+        that.get_question_data(current_page, that.page_count);
+      },
+
+
+      // 获取制定数量的数据
+      get_question_data(start_page, page_count) {
+        let that = this;
+        $.ajax({
+          url: that.$site + "api/query_question_data",
+          dataType: "json",
+          data: {
+            start: start_page,
+            page_count: page_count
+          },
+          success: function (data) {
+            console.log(data);
+            that.data1 = data
+          }
+        });
+      },
+
+
+      // 删除指定的题目
+      delete_question(question_content, question_answer, question_type, question_difficulty, paper_name) {
+        console.log(question_content)
+        let that = this;
+        $.ajax({
+          url: that.$site + "api/delete_question",
+          dataType: "json",
+          data: {
+            question_content: question_content,
+            question_answer: question_answer,
+            question_type: question_type,
+            question_difficulty: question_difficulty,
+            paper_name: paper_name
+          },
+          success: function (data) {
+            console.log(data);
+            if (data["res"] === "success") {
+              that.$Message.success("删除成功");
+              that.page_change(that.current_page);
+            }
+          }
+        });
       }
+
     },
 
     mounted() {
@@ -684,19 +853,6 @@
             })
           }
         }
-      })
-
-      //  获取知识点列表
-      $.ajax({
-        url: that.$site + "api/query_knowledgepoint",
-        dataType: "json",
-        data: {},
-        success: function (data) {
-          console.log(data);
-          for (var i = 0; i < data.length; i++) {
-            that.knowledge.push(data[i])
-          }
-        }
       });
 
       //  获取科目列表
@@ -730,7 +886,24 @@
             })
           }
         }
-      })
+      });
+
+
+      // 获取页的总数据（30条数据为1页）
+      $.ajax({
+        url: that.$site + "api/query_data_count",
+        dataType: "json",
+        data: {},
+        success: function (data) {
+          console.log(data);
+          that.data_count = data['count']
+        }
+      });
+
+      //  获取当前页的数据
+      that.get_question_data(that.current_page, that.page_count);
+
+
     }
   }
 </script>
