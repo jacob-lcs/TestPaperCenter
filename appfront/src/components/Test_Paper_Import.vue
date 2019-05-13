@@ -35,6 +35,7 @@
         <!--    试卷年份选择器    -->
         <DatePicker type="year" @on-change="select_year_change" format="yyyy" placeholder="请选择试卷年份" style="width: 200px"
                     transfer></DatePicker>
+        <Button @click="subject_change">测试</Button>
         <br>
 
         <!--  单选题  -->
@@ -64,7 +65,7 @@
                 <Cascader :data="knowledge" @on-change="knowledge_point_change"
                           transfer style=" width: 200px" change-on-select
                           placeholder="请选择知识点标签"></Cascader>
-                <Poptip trigger="hover" content="没有找到知识点？点击添加">
+                <Poptip trigger="hover" content="没有找到知识点？点击添加" transfer>
                   <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
                         @click="add_knowledge_point"/>
                 </Poptip>
@@ -103,9 +104,9 @@
             </Tag>
             <Row>
               <div class="inline" style="margin-top: 15px; display: flex">
-                <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                          transfer style=" width: 200px" change-on-select
-                          placeholder="请选择知识点标签"></Cascader>
+<!--                <Cascader :data="knowledge" @on-change="knowledge_point_change"-->
+<!--                          transfer style=" width: 200px" change-on-select-->
+<!--                          placeholder="请选择知识点标签"></Cascader>-->
                 <Poptip trigger="hover" content="没有找到知识点？点击添加">
                   <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
                         @click="add_knowledge_point"/>
@@ -708,6 +709,7 @@
           },
           success: function (data) {
             console.log(data);
+            that.knowledge = [];
             for (var i = 0; i < data.length; i++) {
               that.knowledge.push(data[i])
             }

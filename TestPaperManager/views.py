@@ -169,7 +169,10 @@ def add_knowledge_points(request):
     child_knowledge_point = request.GET.get("child_knowledge_point")
     parent_knowledge_point = request.GET.get("parent_knowledge_point")
     subject = request.GET.get("subject")
-    parent_id = KnowledgePoint.objects.filter(name=parent_knowledge_point).first().id
+    if parent_knowledge_point!= '':
+        parent_id = KnowledgePoint.objects.filter(name=parent_knowledge_point).first().id
+    else:
+        parent_id = None
     subject_id = Subject.objects.filter(name=subject).first().id
     KnowledgePoint.objects.create(name=child_knowledge_point, parent_id=parent_id, subject_name_id=subject_id)
     return JsonResponse({"res": "success"}, safe=False)
