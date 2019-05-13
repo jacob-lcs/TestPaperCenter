@@ -104,9 +104,9 @@
             </Tag>
             <Row>
               <div class="inline" style="margin-top: 15px; display: flex">
-<!--                <Cascader :data="knowledge" @on-change="knowledge_point_change"-->
-<!--                          transfer style=" width: 200px" change-on-select-->
-<!--                          placeholder="请选择知识点标签"></Cascader>-->
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
                 <Poptip trigger="hover" content="没有找到知识点？点击添加">
                   <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
                         @click="add_knowledge_point"/>
@@ -725,6 +725,8 @@
           },
           success: function (data) {
             console.log(data);
+            that.knowledgepoint_list_add = [];
+            console.log("此时that.knowledgepoint_list_add的长度为", that.knowledgepoint_list_add.length);
             for (var i = 0; i < data.length; i++) {
               that.knowledgepoint_list_add.push({
                 value: data[i]['name'],
