@@ -7,37 +7,30 @@
         <!-- 左侧栏目 -->
         <div slot="left" class="demo-split-pane">
           <!-- 搜索 -->
-          
+
           <!-- 可拖动列表 -->
-          <draggable v-model="questionSearched" group="question">
-            <transition-group>
-              <!-- <div v-for="element in questionSearched" :key="element.id">{{element.name}}</div> -->
-              <Collapse v-for="element in questionSearched" :key="element.id" class="question-card">
-                <Panel>
-                  {{element.name}}
-                  <Icon
-                    @click="add(element.id)"
-                    style="cursor:pointer"
-                    class="add-button"
-                    type="md-add"
-                  />
-                  <p slot="content" class="question-content">Content of card</p>
-                </Panel>
-                <!-- <p slot="title" class="question-title">
-                  {{element.name}}
-                  <Icon
-                    @click="add(element.id)"
-                    style="cursor:pointer"
-                    class="add-button"
-                    type="md-add"
-                  />
-                </p>
-                <p class="question-content">Content of card</p>
-                <p class="question-content">Content of card</p>
-                <p class="question-content">Content of card</p>-->
-              </Collapse>
-            </transition-group>
-          </draggable>
+          <Scroll style="height:100%">
+            <draggable v-model="questionSearched" group="question">
+              <transition-group>
+                <Collapse
+                  v-for="element in questionSearched"
+                  :key="element.id"
+                  class="question-card"
+                >
+                  <Panel>
+                    {{element.name}}
+                    <Icon
+                      @click="add(element.id)"
+                      style="cursor:pointer"
+                      class="add-button"
+                      type="md-add"
+                    />
+                    <p slot="content" class="question-content">{{element.content}}</p>
+                  </Panel>
+                </Collapse>
+              </transition-group>
+            </draggable>
+          </Scroll>
         </div>
         <!-- 右侧栏目 -->
         <div slot="right" class="demo-split-pane">
@@ -54,9 +47,7 @@
                     type="md-close"
                   />
                 </p>
-                <p class="question-content">Content of card</p>
-                <p class="question-content">Content of card</p>
-                <p class="question-content">Content of card</p>
+                <p class="question-content">{{element.content}}</p>
               </Card>
             </transition-group>
           </draggable>
@@ -72,13 +63,57 @@ export default {
   data() {
     return {
       questionSearched: [
-        { id: 0, name: "xswl" },
-        { id: 1, name: "cxk" },
-        { id: 3, name: "789" },
-        { id: 4, name: "nmsl" },
-        { id: 5, name: "多喝热水" }
+        {
+          id: 0,
+          name: "xswl",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 1,
+          name: "cxk",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 3,
+          name: "789",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 4,
+          name: "nmsl",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 5,
+          name: "多喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 6,
+          name: "少喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 7,
+          name: "不喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        }
       ],
-      questionSelected: [{ id: 6, name: "测试样例呢" }],
+      questionSelected: [
+        {
+          id: 6,
+          name: "测试样例呢",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        }
+      ],
       split: 0.5
     };
   },
@@ -110,7 +145,7 @@ export default {
 
 <style>
 .demo-split {
-  height: 800px;
+  /* height: 800px; */
   border: 1px solid #dcdee2;
 }
 .demo-split-pane {
@@ -144,10 +179,26 @@ body {
 .ivu-collapse-item {
   text-align: left;
 }
-.ivu-collapse-header{
-  font-size: 17px
+.ivu-collapse-header {
+  font-size: 17px;
 }
-.ivu-collapse-content-box{
-  font-size: 12px
+.question-content {
+  font-size: 14px;
+}
+.ivu-collapse-content-box {
+  font-size: 12px;
+}
+.demo-split-pane {
+  height: 100%;
+}
+.ivu-scroll-container {
+  height: 98% !important ;
+}
+#app,
+html,
+body,
+.main,
+.demo-split {
+  height: 100%;
 }
 </style>
