@@ -57,9 +57,12 @@ def query_types(request):
     return JsonResponse(response, safe=False)
 
 
-# 查询知识点列表接口
+# 查询知识点列表接口,递归形式
 @require_http_methods(['GET'])
 def query_knowledgepoint(request):
+    subject = request.GET.get('subject')
+    subject_id = Subject.objects.filter(name=subject).first().id
+
     # 递归查询
     def search_children(a, b):
         if len(a.children.all()) != 0:
@@ -75,7 +78,7 @@ def query_knowledgepoint(request):
                 ii += 1
 
     response = []
-    knowledgepoints = KnowledgePoint.objects.filter(parent=None)
+    knowledgepoints = KnowledgePoint.objects.filter(parent=None, subject_name_id=subject_id)
     i = 0
     for knowledgepoint in knowledgepoints:
         a = {
@@ -85,6 +88,18 @@ def query_knowledgepoint(request):
         response.append(a)
         search_children(knowledgepoint, response[i])
         i += 1
+    return JsonResponse(response, safe=False)
+
+
+# 查询知识点列表接口，非递归形式
+@require_http_methods(["GET"])
+def query_knowledge_point_list(request):
+    response = []
+    subject = request.GET.get("subject")
+    subject_id = Subject.objects.filter(name=subject).first().id
+    KnowledgePoint_list = KnowledgePoint.objects.filter(subject_name_id=subject_id)
+    for knowledge in KnowledgePoint_list:
+        response.append(model_to_dict(knowledge))
     return JsonResponse(response, safe=False)
 
 
@@ -146,3 +161,53 @@ def save_single_topic_selection(request):
         paper.knowledge_point.add(k)
     response = {"res": "success"}
     return JsonResponse(response, safe=False)
+
+
+# 添加知识点接口
+@require_http_methods(["GET"])
+def add_knowledge_points(request):
+    child_knowledge_point = request.GET.get("child_knowledge_point")
+    parent_knowledge_point = request.GET.get("parent_knowledge_point")
+    subject = request.GET.get("subject")
+    if parent_knowledge_point!= '':
+        parent_id = KnowledgePoint.objects.filter(name=parent_knowledge_point).first().id
+    else:
+        parent_id = None
+    subject_id = Subject.objects.filter(name=subject).first().id
+    KnowledgePoint.objects.create(name=child_knowledge_point, parent_id=parent_id, subject_name_id=subject_id)
+    return JsonResponse({"res": "success"}, safe=False)
+
+
+# 查询页面的数据数量
+@require_http_methods(["GET"])
+def query_data_count(request):
+    count = len(Question.objects.all())
+    return JsonResponse({"count": count}, safe=False)
+
+
+# 查询页面的指定数据
+@require_http_methods(["GET"])
+def query_question_data(request):
+    response = []
+    start = int(request.GET.get("start"))
+    page_count = int(request.GET.get("page_count"))
+    start = (start - 1) * page_count
+    qs = Question.objects.all()[start:(start + page_count)]
+    for q in qs:
+        a = {"question_content": q.stem, "question_answer": q.answer, "question_type": q.type.name,
+             "question_difficulty": q.difficulty.name, "paper_name": q.paper_name.name}
+        response.append(a)
+    return JsonResponse(response, safe=False)
+
+
+# 删除指定题目
+@require_http_methods(["GET"])
+def delete_question(request):
+    question_content = request.GET.get("question_content")
+    question_answer = request.GET.get("question_answer")
+    question_type = request.GET.get("question_type")
+    question_difficulty = request.GET.get("question_difficulty")
+    paper_name = request.GET.get("paper_name")
+    Question.objects.filter(stem=question_content, answer=question_answer, type__name=question_type,
+                            difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
+    return JsonResponse({"res": "success"}, safe=False)
