@@ -212,11 +212,3 @@ def delete_question(request):
                             difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
     return JsonResponse({"res": "success"}, safe=False)
 
-
-# 导入模板下载接口
-def download_template(request):
-    file = open('static/excel/导入模板.xlsx', 'rb')
-    response = FileResponse(file)
-    response['Content-Type'] = 'application/octet-stream'
-    response['Content-Disposition'] = 'attachment;filename="导入模板.xlsx"'
-    return response
