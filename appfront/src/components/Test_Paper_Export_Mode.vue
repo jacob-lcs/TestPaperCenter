@@ -55,5 +55,7 @@
     cursor: pointer;
     padding: 30px;
   }
-
+.ivu-layout-content{
+  height: 100%;
+}
 </style>

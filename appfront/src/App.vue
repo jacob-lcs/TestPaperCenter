@@ -1,6 +1,6 @@
 <template>
     <Layout id="app">
-      <Header/>
+      <my-header/>
       <Content>
         <router-view/>
       </Content>
@@ -9,11 +9,11 @@
 
 <script>
 
-import Header from  '@/components/header'
+import MyHeader from  '@/components/header'
   export default {
     name: 'App',
     components:{
-      Header
+      MyHeader
     }
   }
 </script>
