@@ -120,3 +120,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # 这个是和服务器软件链接的时候收集静态文件
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]  # 这个是查找静态资源的目录
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",  # 在系统文件路径查找
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # 在Apps的路径下查找
+)  # 这是查找的方法
