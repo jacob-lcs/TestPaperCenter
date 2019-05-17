@@ -7,14 +7,9 @@
         <!-- 左侧栏目 -->
         <div slot="left" class="demo-split-pane">
           <!-- 搜索 -->
-          <Form :model="formItem" inline>
-            <FormItem label="Input">
-              <Input v-model="formItem.input" placeholder="Enter something..."></Input>
-            </FormItem>
-          </Form>
           <!-- 可拖动列表-题库 -->
           <Scroll style="height:100%">
-          <h1>题库</h1>
+            <!-- 这里加个筛选器 -->
             <draggable v-model="questionSearched" group="question">
               <transition-group>
                 <Collapse
