@@ -9,7 +9,38 @@
           <!-- 搜索 -->
           <!-- 可拖动列表-题库 -->
           <Scroll style="height:100%">
-            <!-- 这里加个筛选器 -->
+            <!-- 选择筛选器 -->
+            <div class="question-fliter" v-for="(filter, i) in questionFilters" :key="i">
+              <strong class="question-fliter-head">{{filter.name}}</strong>
+              <Button
+                type="info"
+                class="question-fliter-item"
+                @click="e=>{question_fliter(e,i,j)}"
+                v-for="(item, j) in filter.items"
+                :ghost="item.selected"
+                :key="j"
+              >{{item.name}}</Button>
+            </div>
+            <!-- 知识点筛选器 -->
+            <div class="question-fliter">
+              <strong class="question-fliter-head">知识点</strong>
+              <Tag
+                v-for="item in knowledgepoint_list"
+                :key="item"
+                :name="item"
+                closable
+                @on-close="knowledgepoint_close"
+                style="margin-top: 15px"
+              >{{ item }}</Tag>
+              <Cascader
+                :data="knowledge"
+                @on-change="knowledge_point_change"
+                transfer
+                style=" width: 200px"
+                change-on-select
+                placeholder="请选择知识点标签"
+              ></Cascader>
+            </div>
             <draggable v-model="questionSearched" group="question">
               <transition-group>
                 <Collapse
@@ -36,23 +67,23 @@
         <div slot="right" class="demo-split-pane">
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
-          <h1>试卷</h1>
-          <draggable v-model="questionSelected" group="question">
-            <transition-group>
-              <Card v-for="element in questionSelected" :key="element.id" class="question-card">
-                <p slot="title" class="question-title">
-                  {{element.name}}
-                  <Icon
-                    @click="remove(element.id)"
-                    style="cursor:pointer"
-                    class="remove-button"
-                    type="md-close"
-                  />
-                </p>
-                <p class="question-content">{{element.content}}</p>
-              </Card>
-            </transition-group>
-          </draggable>
+            <h1>试卷</h1>
+            <draggable v-model="questionSelected" group="question">
+              <transition-group>
+                <Card v-for="element in questionSelected" :key="element.id" class="question-card">
+                  <p slot="title" class="question-title">
+                    {{element.name}}
+                    <Icon
+                      @click="remove(element.id)"
+                      style="cursor:pointer"
+                      class="remove-button"
+                      type="md-close"
+                    />
+                  </p>
+                  <p class="question-content">{{element.content}}</p>
+                </Card>
+              </transition-group>
+            </draggable>
           </Scroll>
         </div>
       </Split>
@@ -62,6 +93,7 @@
 
 <script>
 import draggable from "vuedraggable";
+import { fail } from "assert";
 export default {
   name: "Test_Paper_Export_Mode",
   data() {
@@ -138,10 +170,49 @@ export default {
       ],
       split: 0.5,
       // 筛选题库
-      formItem: {}
+      questionFilters: [
+        {
+          name: "难度",
+          items: [
+            { name: "困难", selected: true },
+            { name: "中等", selected: true },
+            { name: "简单", selected: true },
+            { name: "智障", selected: true },
+            { name: "沙雕", selected: true }
+          ]
+        },
+        {
+          name: "题型",
+          items: [
+            { name: "填空", selected: true },
+            { name: "选择", selected: true },
+            { name: "判断", selected: true },
+            { name: "bulabula", selected: true }
+          ]
+        }
+      ],
+      knowledgepoint_list: [], // 题目知识点列表
+      knowledge: [] // 级联选择器的知识点列表
     };
   },
-  mounted() {},
+  mounted() {
+    let that = this;
+    //  获取知识点列表
+    $.ajax({
+      url: that.$site + "api/query_knowledgepoint",
+      dataType: "json",
+      data: {
+        subject: '物理'
+      },
+      success: function(data) {
+        console.log(data);
+        that.knowledge = [];
+        for (var i = 0; i < data.length; i++) {
+          that.knowledge.push(data[i]);
+        }
+      }
+    });
+  },
   computed: {},
   methods: {
     add(id) {
@@ -159,7 +230,24 @@ export default {
           arr.splice(index, 1);
         }
       });
-    }
+    },
+    question_fliter(e, i, j) {
+      console.log(e, i, j);
+      this.questionFilters[i].items[j].selected = !this.questionFilters[i]
+        .items[j].selected;
+    },
+    // 知识点级联选择变化触发的事件
+    knowledge_point_change(value, selectedData) {
+      console.log("触发级联选择器change事件");
+      if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
+        this.knowledgepoint_list.push(value[value.length - 1]);
+      }
+    },
+      // 关闭知识点标签触发的事件
+      knowledgepoint_close(event, name) {
+        const index = this.knowledgepoint_list.indexOf(name);
+        this.knowledgepoint_list.splice(index, 1);
+      },
   },
   components: {
     draggable
@@ -242,5 +330,16 @@ body,
 }
 .ivu-layout-content {
   height: fit-content;
+}
+.question-fliter-head {
+  font-size: 13px;
+  margin: 10px 20px;
+}
+.question-fliter-item {
+  margin: 0 5px;
+}
+.question-fliter {
+  display: flex;
+  align-items: center;
 }
 </style>
