@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 from .models import User, Paper, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
@@ -169,7 +169,7 @@ def add_knowledge_points(request):
     child_knowledge_point = request.GET.get("child_knowledge_point")
     parent_knowledge_point = request.GET.get("parent_knowledge_point")
     subject = request.GET.get("subject")
-    if parent_knowledge_point!= '':
+    if parent_knowledge_point != '':
         parent_id = KnowledgePoint.objects.filter(name=parent_knowledge_point).first().id
     else:
         parent_id = None
@@ -211,3 +211,4 @@ def delete_question(request):
     Question.objects.filter(stem=question_content, answer=question_answer, type__name=question_type,
                             difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
     return JsonResponse({"res": "success"}, safe=False)
+

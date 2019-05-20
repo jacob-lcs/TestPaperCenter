@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'TestPaperManager.middlewares.Cros'
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'TestPaperCenter.urls'
@@ -84,7 +85,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
@@ -120,3 +120,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')  # 这个是和服务器软件链接的时候收集静态文件
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",  # 在系统文件路径查找
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # 在Apps的路径下查找
+)  # 这是查找的方法

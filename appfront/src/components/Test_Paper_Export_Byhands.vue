@@ -1,0 +1,345 @@
+<template>
+  <div class="main">
+    <!-- <h1>Test_Paper_Export</h1> -->
+    <!-- 将页面分成两部分 -->
+    <div class="demo-split">
+      <Split v-model="split">
+        <!-- 左侧栏目 -->
+        <div slot="left" class="demo-split-pane">
+          <!-- 搜索 -->
+          <!-- 可拖动列表-题库 -->
+          <Scroll style="height:100%">
+            <!-- 选择筛选器 -->
+            <div class="question-fliter" v-for="(filter, i) in questionFilters" :key="i">
+              <strong class="question-fliter-head">{{filter.name}}</strong>
+              <Button
+                type="info"
+                class="question-fliter-item"
+                @click="e=>{question_fliter(e,i,j)}"
+                v-for="(item, j) in filter.items"
+                :ghost="item.selected"
+                :key="j"
+              >{{item.name}}</Button>
+            </div>
+            <!-- 知识点筛选器 -->
+            <div class="question-fliter">
+              <strong class="question-fliter-head">知识点</strong>
+              <Tag
+                v-for="item in knowledgepoint_list"
+                :key="item"
+                :name="item"
+                closable
+                @on-close="knowledgepoint_close"
+                style="margin-top: 15px"
+              >{{ item }}</Tag>
+              <Cascader
+                :data="knowledge"
+                @on-change="knowledge_point_change"
+                transfer
+                style=" width: 200px"
+                change-on-select
+                placeholder="请选择知识点标签"
+              ></Cascader>
+            </div>
+            <draggable v-model="questionSearched" group="question">
+              <transition-group>
+                <Collapse
+                  v-for="element in questionSearched"
+                  :key="element.id"
+                  class="question-card"
+                >
+                  <Panel>
+                    {{element.name}}
+                    <Icon
+                      @click="add(element.id)"
+                      style="cursor:pointer"
+                      class="add-button"
+                      type="md-add"
+                    />
+                    <p slot="content" class="question-content">{{element.content}}</p>
+                  </Panel>
+                </Collapse>
+              </transition-group>
+            </draggable>
+          </Scroll>
+        </div>
+        <!-- 右侧栏目 -->
+        <div slot="right" class="demo-split-pane">
+          <!-- 可拖动列表-组卷 -->
+          <Scroll style="height:100%">
+            <h1>试卷</h1>
+            <draggable v-model="questionSelected" group="question">
+              <transition-group>
+                <Card v-for="element in questionSelected" :key="element.id" class="question-card">
+                  <p slot="title" class="question-title">
+                    {{element.name}}
+                    <Icon
+                      @click="remove(element.id)"
+                      style="cursor:pointer"
+                      class="remove-button"
+                      type="md-close"
+                    />
+                  </p>
+                  <p class="question-content">{{element.content}}</p>
+                </Card>
+              </transition-group>
+            </draggable>
+          </Scroll>
+        </div>
+      </Split>
+    </div>
+  </div>
+</template>
+
+<script>
+import draggable from "vuedraggable";
+import { fail } from "assert";
+export default {
+  name: "Test_Paper_Export_Mode",
+  data() {
+    return {
+      questionSearched: [
+        {
+          id: 0,
+          name: "xswl",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 1,
+          name: "cxk",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 3,
+          name: "789",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 4,
+          name: "nmsl",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 5,
+          name: "多喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 6,
+          name: "少喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 7,
+          name: "不喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 8,
+          name: "不喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 9,
+          name: "不喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        },
+        {
+          id: 10,
+          name: "不喝热水",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        }
+      ],
+      questionSelected: [
+        {
+          id: 6,
+          name: "测试样例呢",
+          content:
+            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+        }
+      ],
+      split: 0.5,
+      // 筛选题库
+      questionFilters: [
+        {
+          name: "难度",
+          items: [
+            { name: "困难", selected: true },
+            { name: "中等", selected: true },
+            { name: "简单", selected: true },
+            { name: "智障", selected: true },
+            { name: "沙雕", selected: true }
+          ]
+        },
+        {
+          name: "题型",
+          items: [
+            { name: "填空", selected: true },
+            { name: "选择", selected: true },
+            { name: "判断", selected: true },
+            { name: "bulabula", selected: true }
+          ]
+        }
+      ],
+      knowledgepoint_list: [], // 题目知识点列表
+      knowledge: [] // 级联选择器的知识点列表
+    };
+  },
+  mounted() {
+    let that = this;
+    //  获取知识点列表
+    $.ajax({
+      url: that.$site + "api/query_knowledgepoint",
+      dataType: "json",
+      data: {
+        subject: '物理'
+      },
+      success: function(data) {
+        console.log(data);
+        that.knowledge = [];
+        for (var i = 0; i < data.length; i++) {
+          that.knowledge.push(data[i]);
+        }
+      }
+    });
+  },
+  computed: {},
+  methods: {
+    add(id) {
+      this.questionSearched.forEach((item, index, arr) => {
+        if (item.id == id) {
+          this.questionSelected.push(item);
+          arr.splice(index, 1);
+        }
+      });
+    },
+    remove(id) {
+      this.questionSelected.forEach((item, index, arr) => {
+        if (item.id == id) {
+          this.questionSearched.push(item);
+          arr.splice(index, 1);
+        }
+      });
+    },
+    question_fliter(e, i, j) {
+      console.log(e, i, j);
+      this.questionFilters[i].items[j].selected = !this.questionFilters[i]
+        .items[j].selected;
+    },
+    // 知识点级联选择变化触发的事件
+    knowledge_point_change(value, selectedData) {
+      console.log("触发级联选择器change事件");
+      if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
+        this.knowledgepoint_list.push(value[value.length - 1]);
+      }
+    },
+      // 关闭知识点标签触发的事件
+      knowledgepoint_close(event, name) {
+        const index = this.knowledgepoint_list.indexOf(name);
+        this.knowledgepoint_list.splice(index, 1);
+      },
+  },
+  components: {
+    draggable
+  }
+};
+</script>
+
+<style>
+.demo-split {
+  /* height: 800px; */
+  border: 1px solid #dcdee2;
+}
+
+.demo-split-pane {
+  padding: 10px;
+}
+
+.question-card {
+  margin: 10px;
+}
+
+.question-title {
+  text-align: left;
+}
+
+.question-content {
+  text-align: left;
+}
+
+body {
+  height: 100%;
+}
+
+.ivu-card-head {
+  display: flex;
+}
+
+.add-button {
+  float: right;
+
+  font-size: 20px;
+  margin-top: 8px;
+}
+
+.remove-button {
+  line-height: 20px;
+  float: right;
+}
+
+.ivu-collapse-item {
+  text-align: left;
+}
+
+.ivu-collapse-header {
+  font-size: 17px;
+}
+
+.question-content {
+  font-size: 14px;
+}
+
+.ivu-collapse-content-box {
+  font-size: 12px;
+}
+
+.demo-split-pane {
+  height: 100%;
+}
+
+.ivu-scroll-container {
+  height: 98% !important;
+}
+
+#app,
+html,
+body,
+.main,
+.demo-split {
+  height: 100%;
+}
+.ivu-layout-content {
+  height: fit-content;
+}
+.question-fliter-head {
+  font-size: 13px;
+  margin: 10px 20px;
+}
+.question-fliter-item {
+  margin: 0 5px;
+}
+.question-fliter {
+  display: flex;
+  align-items: center;
+}
+</style>

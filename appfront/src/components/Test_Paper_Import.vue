@@ -104,9 +104,9 @@
             </Tag>
             <Row>
               <div class="inline" style="margin-top: 15px; display: flex">
-<!--                <Cascader :data="knowledge" @on-change="knowledge_point_change"-->
-<!--                          transfer style=" width: 200px" change-on-select-->
-<!--                          placeholder="请选择知识点标签"></Cascader>-->
+                <Cascader :data="knowledge" @on-change="knowledge_point_change"
+                          transfer style=" width: 200px" change-on-select
+                          placeholder="请选择知识点标签"></Cascader>
                 <Poptip trigger="hover" content="没有找到知识点？点击添加">
                   <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
                         @click="add_knowledge_point"/>
@@ -245,7 +245,6 @@
         </Select>
       </div>
     </Modal>
-
     <div class="single-choice">
       <Row style="background:#eee;padding:20px">
         <Col span="25">
@@ -254,7 +253,17 @@
               <Col span="12" style="text-align: left; font-size: 20px">
                 <p>题目列表</p>
               </Col>
-              <Col span="12" style="text-align: right; ">
+              <Col span="4" style="text-align: right; ">
+                <Button icon="ios-cloud-download" type="primary" style="font-size: 15px;" @click="download_template">
+                  下载模板
+                </Button>
+              </Col>
+              <Col span="4" style="text-align: right; ">
+                <Upload action="http://127.0.0.1:8000/static/TestPaperManager/excel/">
+                  <Button type="primary" style="height: 38px;" icon="ios-cloud-upload">Upload files</Button>
+                </Upload>
+              </Col>
+              <Col span="4" style="text-align: right; ">
                 <Button icon="md-add" type="primary" style="font-size: 15px;"
                         @click="modal12 = true">添加试题
                 </Button>
@@ -725,6 +734,8 @@
           },
           success: function (data) {
             console.log(data);
+            that.knowledgepoint_list_add = [];
+            console.log("此时that.knowledgepoint_list_add的长度为", that.knowledgepoint_list_add.length);
             for (var i = 0; i < data.length; i++) {
               that.knowledgepoint_list_add.push({
                 value: data[i]['name'],
@@ -812,7 +823,13 @@
             }
           }
         });
-      }
+      },
+
+      // 下载导入模板
+      download_template() {
+        window.open('http://127.0.0.1:8000/static/TestPaperManager/excel/import_template.xlsx')
+      },
+
 
     },
 
