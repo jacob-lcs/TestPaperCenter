@@ -1,9 +1,14 @@
 <template>
   <div class="all">
-    <div style="text-align: right;padding-top: 10px;margin-right: 20px; font-size: 20px">
-      <Poptip word-wrap content="点击登录" placement="left" trigger="hover" >
-        <Icon type="ios-contact" size="40" style="margin-right: 10px; cursor: pointer"/>
+    <!--  登录icon图  -->
+    <div style="text-align: right;padding-top: 10px;margin-right: 20px; font-size: 20px" v-if="per_name.length === 0">
+      <Poptip word-wrap content="点击登录" placement="left" trigger="hover">
+        <Icon type="ios-contact" size="40" style="margin-right: 10px; cursor: pointer" @click="login_click"/>
       </Poptip>
+    </div>
+    <!--  显示用户名  -->
+    <div style="text-align: right;padding-top: 10px;margin-right: 20px; font-size: 20px" v-if="per_name.length !== 0">
+      <p style="margin-right: 10px; font-size: 20px">{{per_name}}, 欢迎 </p>
     </div>
     <!--左侧信息栏-->
     <div class="sideleft">
@@ -18,15 +23,15 @@
     </div>
     <!--  试卷导入按钮  -->
     <div style="text-align: right">
-      <Card style="width:320px;" class="paper_import">
-        <div style="text-align:center">
+      <Card style="width:320px; cursor: pointer" class="paper_import">
+        <div style="text-align:center" @click="paper_import">
           <img src="../assets/img/paper_import.png" style="width: 100px">
           <h3 style="margin-top: 10px">试题导入</h3>
         </div>
       </Card>
       <!--  试卷导出按钮  -->
-      <Card style="width:320px" class="paper_export">
-        <div style="text-align:center">
+      <Card style="width:320px; cursor: pointer" class="paper_export">
+        <div style="text-align:center" @click="paper_export">
           <img src="../assets/img/paper_export.png" style="width: 100px">
           <h3 style="margin-top: 10px">试卷导出</h3>
         </div>
@@ -39,7 +44,33 @@
 
 <script>
   export default {
-    name: "home_page"
+    name: "home_page",
+    data() {
+      return{
+        per_name:''
+      }
+    },
+    methods: {
+      paper_import() {
+        console.log("点击导入按钮");
+        this.$router.push("/Test_Paper_Import");
+      },
+
+      paper_export() {
+        console.log("点击导出按钮");
+        this.$router.push("/Test_Paper_Export_Mode");
+      },
+
+      // 点击登录按钮
+      login_click() {
+        this.$router.push("/login")
+      }
+    },
+    mounted() {
+      let that = this;
+
+      that.per_name = sessionStorage.getItem("per_name")
+    }
   }
 </script>
 
