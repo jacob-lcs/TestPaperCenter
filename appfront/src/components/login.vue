@@ -4,7 +4,7 @@
 
       <!--左侧信息栏-->
       <div class="sideleft">
-        <p style="font-size: 37px; font-weight: bold;color: #fdfbfb">智能组卷    智慧学习</p>
+        <p style="font-size: 35px; font-weight: bold;color: #fdfbfb">智能组卷    智慧学习</p>
         <p style="font-size: 22px;color: #fdfbfb">大数据结合试题系统 让刷题更轻松</p>
         <div style="margin-top: 30px">
           <p>轻松模板录入，提高试题更新效率。</p>
