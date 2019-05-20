@@ -4,6 +4,7 @@ import login from '@/components/login'
 import Test_Paper_Import from  '@/components/Test_Paper_Import'
 import Test_Paper_Export_Byhands from  '@/components/Test_Paper_Export_Byhands'
 import Test_Paper_Export_Mode from  '@/components/Test_Paper_Export_Mode'
+import home_page from  '@/components/home_page'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/Test_Paper_Export_Mode',
       name: 'Test_Paper_Export_Mode',
       component: Test_Paper_Export_Mode
+    },
+    {
+      path: '/home_page',
+      name: 'home_page',
+      component: home_page
     }
   ]
 })
