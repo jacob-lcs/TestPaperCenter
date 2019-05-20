@@ -69,7 +69,11 @@
         <div slot="right" class="demo-split-pane">
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
-            <h1>试卷</h1>
+            <div style="display:flex;">
+              <Button type="text" ghost style="margin-left:10px">不要点我哦</Button> 
+              <h1 style="flex:1">试卷</h1>
+              <Button type="info" style="margin-right:10px">加入分隔线</Button>
+            </div>
             <draggable v-model="questionSelected" group="question">
               <transition-group>
                 <Card v-for="element in questionSelected" :key="element.id" class="question-card">
@@ -193,12 +197,14 @@ export default {
         }
       ],
       knowledgepoint_list: [], // 题目知识点列表
-      knowledge: [] // 级联选择器的知识点列表
+      knowledge: [], // 级联选择器的知识点列表
+      paperInfo: {}
     };
   },
   mounted() {
     let that = this;
     //  获取知识点列表
+    console.log("params:", this.$route.params);
     $.ajax({
       url: that.$site + "api/query_knowledgepoint",
       dataType: "json",
@@ -277,7 +283,6 @@ export default {
 .question-content {
   text-align: left;
 }
-
 
 .ivu-card-head {
   display: flex;
