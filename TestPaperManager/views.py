@@ -5,6 +5,8 @@ from .models import User, Paper, QuestionDifficulty, QuestionTypes, KnowledgePoi
     Question
 from django.contrib.auth.hashers import make_password, check_password
 from django.forms.models import model_to_dict
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 # 登录接口
@@ -212,3 +214,9 @@ def delete_question(request):
                             difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
     return JsonResponse({"res": "success"}, safe=False)
 
+
+@csrf_exempt
+def search_questions(request):
+    if request.method == 'POST':
+        print(json.loads(request.body.decode()))
+    return JsonResponse({'ok': True})
