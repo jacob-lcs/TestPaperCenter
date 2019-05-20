@@ -46,30 +46,6 @@
     </div>
   </div>
 </template>
-<!--
-<p class="title">满分题库系统</p>
-<br>
-<Form ref="formInline" :model="formInline" :rules="ruleInline" inline>
-  <FormItem prop="user">
-    <Input type="text" v-model="formInline.user" placeholder="Username" class="in_text">
-      <Icon type="ios-person-outline" slot="prepend"></Icon>
-    </Input>
-  </FormItem>
-  <br>
-  <FormItem prop="password">
-    <Input type="password" v-model="formInline.password" placeholder="Password" class="in_text">
-      <Icon type="ios-lock-outline" slot="prepend"></Icon>
-    </Input>
-  </FormItem>
-  <br>
-  <FormItem>
-    <Button type="primary" @click="handleSubmit('formInline')">登录</Button>
-  </FormItem>
-</Form>
-
-</div>
-</template>
--->
 <script>
   export default {
     name: "login",
@@ -177,8 +153,9 @@
     background-image: url("../assets/img/bg5.jpg");
     background-repeat: no-repeat;
     background-position: 50% 50%;
-    background-size: 200vh;
+    background-size: 250vh;
     height: 100vh;
+    font-family: "Microsoft YaHei" ! important;
   }
 
 </style>
