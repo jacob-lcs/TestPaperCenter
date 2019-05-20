@@ -24,14 +24,16 @@
             <!-- 知识点筛选器 -->
             <div class="question-fliter">
               <strong class="question-fliter-head">知识点</strong>
-              <Tag
-                v-for="item in knowledgepoint_list"
-                :key="item"
-                :name="item"
-                closable
-                @on-close="knowledgepoint_close"
-                style="margin-top: 15px"
-              >{{ item }}</Tag>
+              <div style="padding:10px 0">
+                <Tag
+                  v-for="item in knowledgepoint_list"
+                  :key="item"
+                  :name="item"
+                  closable
+                  @on-close="knowledgepoint_close"
+                  style="margin: 3px 5px"
+                >{{ item }}</Tag>
+              </div>
               <Cascader
                 :data="knowledge"
                 @on-change="knowledge_point_change"
@@ -93,7 +95,6 @@
 
 <script>
 import draggable from "vuedraggable";
-import { fail } from "assert";
 export default {
   name: "Test_Paper_Export_Mode",
   data() {
@@ -202,7 +203,7 @@ export default {
       url: that.$site + "api/query_knowledgepoint",
       dataType: "json",
       data: {
-        subject: '物理'
+        subject: "物理"
       },
       success: function(data) {
         console.log(data);
@@ -243,11 +244,11 @@ export default {
         this.knowledgepoint_list.push(value[value.length - 1]);
       }
     },
-      // 关闭知识点标签触发的事件
-      knowledgepoint_close(event, name) {
-        const index = this.knowledgepoint_list.indexOf(name);
-        this.knowledgepoint_list.splice(index, 1);
-      },
+    // 关闭知识点标签触发的事件
+    knowledgepoint_close(event, name) {
+      const index = this.knowledgepoint_list.indexOf(name);
+      this.knowledgepoint_list.splice(index, 1);
+    }
   },
   components: {
     draggable
@@ -255,7 +256,7 @@ export default {
 };
 </script>
 
-<style>
+<style scope>
 .demo-split {
   /* height: 800px; */
   border: 1px solid #dcdee2;
@@ -277,9 +278,6 @@ export default {
   text-align: left;
 }
 
-body {
-  height: 100%;
-}
 
 .ivu-card-head {
   display: flex;
@@ -341,5 +339,8 @@ body,
 .question-fliter {
   display: flex;
   align-items: center;
+}
+.ivu-layout {
+  background: #fff;
 }
 </style>
