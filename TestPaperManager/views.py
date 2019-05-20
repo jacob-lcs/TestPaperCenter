@@ -1,5 +1,6 @@
 from django.http import JsonResponse, FileResponse
-from django.shortcuts import render
+import pyexcel_xlsx
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from .models import User, Paper, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
     Question
@@ -140,27 +141,30 @@ def save_single_topic_selection(request):
     question_difficult = request.GET.get('question_difficult')
     question_knowledgepoints = dict(request.GET).get('question_knowledgepoints[list][]')
     sql_school_name = School.objects.filter(name=school_name)
-    if not sql_school_name:
-        School(name=school_name).save()
-    sql_school_name = School.objects.filter(name=school_name)
-    sql_subject_name = Subject.objects.filter(name=subject)
-    sql_grade = Grade.objects.filter(name=grade)
-    sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
-                                          grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id)
-    if not sql_paper_name:
-        Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
-              grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id).save()
-    sql_paper_name = Paper.objects.filter(name=paper_name)
-    sql_question_type = QuestionTypes.objects.filter(name=question_type)
-    sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
-    paper = Question.objects.create(stem=question_stem, answer=question_answer, type_id=sql_question_type.first().id,
-                                    difficulty_id=sql_question_difficult.first().id,
-                                    paper_name_id=sql_paper_name.first().id)
-    knowledgepoints = []
-    for knowledgepoint in question_knowledgepoints:
-        knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
-    for k in knowledgepoints:
-        paper.knowledge_point.add(k)
+    if not Question.objects.filter(stem=question_stem, answer=question_answer):
+        if not sql_school_name:
+            School(name=school_name).save()
+        sql_school_name = School.objects.filter(name=school_name)
+        sql_subject_name = Subject.objects.filter(name=subject)
+        sql_grade = Grade.objects.filter(name=grade)
+        sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year,
+                                              subject_name_id=sql_subject_name.first().id,
+                                              grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id)
+        if not sql_paper_name:
+            Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
+                  grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id).save()
+        sql_paper_name = Paper.objects.filter(name=paper_name)
+        sql_question_type = QuestionTypes.objects.filter(name=question_type)
+        sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
+        paper = Question.objects.create(stem=question_stem, answer=question_answer,
+                                        type_id=sql_question_type.first().id,
+                                        difficulty_id=sql_question_difficult.first().id,
+                                        paper_name_id=sql_paper_name.first().id)
+        knowledgepoints = []
+        for knowledgepoint in question_knowledgepoints:
+            knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
+        for k in knowledgepoints:
+            paper.knowledge_point.add(k)
     response = {"res": "success"}
     return JsonResponse(response, safe=False)
 
@@ -194,7 +198,7 @@ def query_question_data(request):
     start = int(request.GET.get("start"))
     page_count = int(request.GET.get("page_count"))
     start = (start - 1) * page_count
-    qs = Question.objects.all()[start:(start + page_count)]
+    qs = Question.objects.all().order_by('-id')[start:(start + page_count)]
     for q in qs:
         a = {"question_content": q.stem, "question_answer": q.answer, "question_type": q.type.name,
              "question_difficulty": q.difficulty.name, "paper_name": q.paper_name.name}
@@ -213,6 +217,59 @@ def delete_question(request):
     Question.objects.filter(stem=question_content, answer=question_answer, type__name=question_type,
                             difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
     return JsonResponse({"res": "success"}, safe=False)
+
+
+# 上传
+@csrf_exempt
+def upload_excel(request):
+    if request.method == "POST":
+        file = request.FILES['file']
+        error_time = 0
+        formatted_excel_data = list(pyexcel_xlsx.get_data(file).values())[0]
+        for i in range(2, len(formatted_excel_data)):
+            if '' in formatted_excel_data[i][0:9] or formatted_excel_data[i] == []:
+                error_time += 1
+                continue
+            else:
+                school_name = formatted_excel_data[i][9]
+                paper_name = formatted_excel_data[i][5]
+                paper_year = formatted_excel_data[i][6]
+                grade = formatted_excel_data[i][8]
+                subject = formatted_excel_data[i][7]
+                question_type = formatted_excel_data[i][2]
+                question_stem = formatted_excel_data[i][0]
+                question_answer = formatted_excel_data[i][1]
+                question_difficult = formatted_excel_data[i][3]
+                question_knowledgepoints = formatted_excel_data[i][4].split('；')
+                sql_school_name = School.objects.filter(name=school_name)
+                if not Question.objects.filter(stem=question_stem, answer=question_answer):
+                    if not sql_school_name:
+                        School(name=school_name).save()
+                    sql_school_name = School.objects.filter(name=school_name)
+                    sql_subject_name = Subject.objects.filter(name=subject)
+                    sql_grade = Grade.objects.filter(name=grade)
+                    sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year,
+                                                          subject_name_id=sql_subject_name.first().id,
+                                                          grade_id=sql_grade.first().id,
+                                                          school_name_id=sql_school_name.first().id)
+                    if not sql_paper_name:
+                        Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
+                              grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id).save()
+                    sql_paper_name = Paper.objects.filter(name=paper_name)
+                    sql_question_type = QuestionTypes.objects.filter(name=question_type)
+                    sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
+                    paper = Question.objects.create(stem=question_stem, answer=question_answer,
+                                                    type_id=sql_question_type.first().id,
+                                                    difficulty_id=sql_question_difficult.first().id,
+                                                    paper_name_id=sql_paper_name.first().id)
+                    knowledgepoints = []
+                    print(question_knowledgepoints)
+                    for knowledgepoint in question_knowledgepoints:
+                        knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
+                    for k in knowledgepoints:
+                        paper.knowledge_point.add(k)
+        response = {"res": "success"}
+        return JsonResponse(response, safe=False)
 
 
 @csrf_exempt

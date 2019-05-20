@@ -259,8 +259,8 @@
                 </Button>
               </Col>
               <Col span="4" style="text-align: right; ">
-                <Upload action="http://127.0.0.1:8000/static/TestPaperManager/excel/">
-                  <Button type="primary" style="height: 38px;" icon="ios-cloud-upload">Upload files</Button>
+                <Upload action="//127.0.0.1:8000/api/upload_excel" :on-success="upload_success">
+                  <Button type="primary" style="height: 38px; font-size: 15px;" icon="ios-cloud-upload">上传文件</Button>
                 </Upload>
               </Col>
               <Col span="4" style="text-align: right; ">
@@ -829,6 +829,13 @@
       download_template() {
         window.open('http://127.0.0.1:8000/static/TestPaperManager/excel/import_template.xlsx')
       },
+
+      //  导入试题成功
+      upload_success() {
+        let that = this;
+        that.$Message.success("上传成功");
+        that.page_change(that.current_page);
+      }
 
 
     },
