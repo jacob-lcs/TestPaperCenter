@@ -1,6 +1,6 @@
 <template>
   <Layout id="app">
-    <my-header/>
+    <my-header v-if="this.$route.path != '/'"/>
     <Content>
       <router-view/>
     </Content>
