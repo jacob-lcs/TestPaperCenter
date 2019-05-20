@@ -15,5 +15,7 @@ urlpatterns = [
     url(r'query_data_count$', views.query_data_count),
     url(r'query_question_data$', views.query_question_data),
     url(r'delete_question$', views.delete_question),
-    url(r'upload_excel$', views.upload_excel)
+    url(r'upload_excel$', views.upload_excel),
+    # zlm's
+    url(r'search_question$', views.search_questions),
 ]
