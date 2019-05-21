@@ -275,5 +275,11 @@ def upload_excel(request):
 @csrf_exempt
 def search_questions(request):
     if request.method == 'POST':
-        print(json.loads(request.body.decode()))
+        request_data = json.loads(request.body.decode())
+        paperInfo = request_data.get('paperInfo', False)
+        if paperInfo and paperInfo['ok']:
+            print(QuestionDifficulty.objects.all())
+            print(QuestionTypes.objects.all())
+            print(KnowledgePoint.objects.all())
+            pass
     return JsonResponse({'ok': True})
