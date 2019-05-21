@@ -35,20 +35,18 @@
           </FormItem>
           <FormItem label="学校">
             <Input v-model="paperInfo.school"></Input>
-          </FormItem>
+          </FormItem> 
           <FormItem label="科目">
             <Select v-model="paperInfo.subject">
-              <Option value="1" key="1">数学</Option>
-              <Option value="2" key="2">物理</Option>
+              <Option v-for="subject in subjects" :value="subject.id" :key="subject.id">{{subject.name}}</Option>
             </Select>
           </FormItem>
           <FormItem label="年级" style="margin-bottom:0px">
             <Select v-model="paperInfo.grade">
-              <Option value="1" key="1">初中一年级</Option>
-              <Option value="2" key="2">初中二年级</Option>
+              <Option v-for="grade in grades" :value="grade.id" :key="grade.id">{{grade.name}}</Option>
             </Select>
           </FormItem>
-        </Form>
+        </Form> 
       </div>
       <div slot="footer">
         <Button type="error" size="large" long :loading="modal_loading" @click="confirm">确定</Button>
@@ -67,36 +65,86 @@ export default {
       paperInfo: {
         paper_name: "兰生复旦7年级综合卷",
         school: "复旦什么学校",
-        subject: "1",
-        grade: "2"
+        subject: 1,
+        grade: 1
       },
       modal_loading: false,
-      mode: "auto"
+      mode: "auto",
+      subjects: [],
+      grades: []
     };
+  },
+  mounted() {
+    // 查询题型
+    this.$axios
+      .get(this.$site + "api/query_subjects")
+      .then(res => {
+        console.log("query_subjects", res.data);
+        var subjects = [];
+        for (const item in res.data) {
+          if (res.data.hasOwnProperty(item)) {
+            const element = res.data[item];
+            subjects.push({
+              id: element.id,
+              name: element.name,
+              selected: true
+            });
+          }
+        }
+        this.subjects = subjects;
+      })
+      .catch(err => {
+        this.$Notice.error({
+          title: "查询题型失败",
+          desc: err
+        });
+      }); 
+    // 查询年级
+    this.$axios
+      .get(this.$site + "api/query_grades")
+      .then(res => {
+        console.log("query_grades", res.data);
+        var grades = [];
+        for (const item in res.data) {
+          if (res.data.hasOwnProperty(item)) {
+            const element = res.data[item];
+            grades.push({
+              id: element.id,
+              name: element.name,
+              selected: true
+            });
+          }
+        }
+        this.grades = grades;
+      })
+      .catch(err => {
+        this.$Notice.error({
+          title: "查询年级失败",
+          desc: err
+        });
+      });
   },
   methods: {
     export_byhands() {
       console.log("manual");
       this.mode = "manual";
       this.showPaperInfo = true;
-      this.$router.push({
-        name: "Test_Paper_Export_Byhands",
-        params: this.paperInfo
-      });
     },
     export_auto() {
       console.log("auto");
       this.mode = "auto";
       this.showPaperInfo = true;
-      // this.$router.push("/Test_Paper_Export_Byhands");
     },
     confirm() {
-      this.modal_loading = true;
-      setTimeout(() => {
-        this.modal_loading = false;
-        this.modal2 = false;
-        this.$Message.success("Successfully delete");
-      }, 2000);
+      // this.modal_loading = true;
+      this.$router.push({
+        name: "Test_Paper_Export_Byhands",
+        params: this.paperInfo
+      });
+      // setTimeout(() => {
+      //   this.modal_loading = false;
+      //   this.modal2 = false;
+      // }, 2000);
     }
   }
 };
