@@ -80,7 +80,9 @@
               },
               success: function (data) {
                 if (data['res'] === "no") {
-                  that.$Message.warning('用户名或密码错误');
+                  that.$Notice.warning({
+                    title: '用户名或密码错误'
+                  })
                 } else {
                   sessionStorage.setItem('per_name', that.formInline.user);
                   sessionStorage.setItem('identity', data['identity'])
@@ -90,7 +92,9 @@
 
             });
           } else {
-            this.$Message.error('Fail!');
+            that.$Notice.error({
+              title: 'Fail'
+            })
           }
         })
       },
@@ -124,10 +128,10 @@
     margin-top: 120px;
 
   }
-  .button>>>.ivu-btn ivu-btn-primary{
+
+  .button >>> .ivu-btn ivu-btn-primary {
     background-color: #2c3e50;
   }
-
 
 
   .in_name {
