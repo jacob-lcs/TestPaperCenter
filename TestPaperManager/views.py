@@ -1,13 +1,16 @@
-from django.http import JsonResponse, FileResponse
+import json
+
 import pyexcel_xlsx
+from django.contrib.auth.hashers import check_password
+from django.db.models import Q
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .models import User, Paper, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
+
+from .models import User, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
     Question
-from django.contrib.auth.hashers import make_password, check_password
-from django.forms.models import model_to_dict
-from django.views.decorators.csrf import csrf_exempt
-import json
+from .serialize import QuestionSerialize
 
 
 # 登录接口
