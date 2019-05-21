@@ -81,7 +81,7 @@ def query_knowledgepoint(request):
                 ii += 1
 
     response = []
-    knowledgepoints = KnowledgePoint.objects.filter(parent=None, subject_name_id=subject_id)
+    knowledgepoints = KnowledgePoint.objects.filter(parent=None, subject_id=subject_id)
     i = 0
     for knowledgepoint in knowledgepoints:
         a = {
@@ -100,7 +100,7 @@ def query_knowledge_point_list(request):
     response = []
     subject = request.GET.get("subject")
     subject_id = Subject.objects.filter(name=subject).first().id
-    KnowledgePoint_list = KnowledgePoint.objects.filter(subject_name_id=subject_id)
+    KnowledgePoint_list = KnowledgePoint.objects.filter(subject_id=subject_id)
     for knowledge in KnowledgePoint_list:
         response.append(model_to_dict(knowledge))
     return JsonResponse(response, safe=False)
@@ -148,18 +148,18 @@ def save_single_topic_selection(request):
         sql_subject_name = Subject.objects.filter(name=subject)
         sql_grade = Grade.objects.filter(name=grade)
         sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year,
-                                              subject_name_id=sql_subject_name.first().id,
-                                              grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id)
+                                              subject_id=sql_subject_name.first().id,
+                                              grade_id=sql_grade.first().id, school_id=sql_school_name.first().id)
         if not sql_paper_name:
-            Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
-                  grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id).save()
+            Paper(name=paper_name, year=paper_year, subject_id=sql_subject_name.first().id,
+                  grade_id=sql_grade.first().id, school_id=sql_school_name.first().id).save()
         sql_paper_name = Paper.objects.filter(name=paper_name)
         sql_question_type = QuestionTypes.objects.filter(name=question_type)
         sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
         paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                         type_id=sql_question_type.first().id,
                                         difficulty_id=sql_question_difficult.first().id,
-                                        paper_name_id=sql_paper_name.first().id)
+                                        paper_id=sql_paper_name.first().id)
         knowledgepoints = []
         for knowledgepoint in question_knowledgepoints:
             knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
@@ -180,7 +180,7 @@ def add_knowledge_points(request):
     else:
         parent_id = None
     subject_id = Subject.objects.filter(name=subject).first().id
-    KnowledgePoint.objects.create(name=child_knowledge_point, parent_id=parent_id, subject_name_id=subject_id)
+    KnowledgePoint.objects.create(name=child_knowledge_point, parent_id=parent_id, subject_id=subject_id)
     return JsonResponse({"res": "success"}, safe=False)
 
 
@@ -215,7 +215,7 @@ def delete_question(request):
     question_difficulty = request.GET.get("question_difficulty")
     paper_name = request.GET.get("paper_name")
     Question.objects.filter(stem=question_content, answer=question_answer, type__name=question_type,
-                            difficulty__name=question_difficulty, paper_name__name=paper_name).delete()
+                            difficulty__name=question_difficulty, paper__name=paper_name).delete()
     return JsonResponse({"res": "success"}, safe=False)
 
 
@@ -249,19 +249,19 @@ def upload_excel(request):
                     sql_subject_name = Subject.objects.filter(name=subject)
                     sql_grade = Grade.objects.filter(name=grade)
                     sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year,
-                                                          subject_name_id=sql_subject_name.first().id,
+                                                          subject_id=sql_subject_name.first().id,
                                                           grade_id=sql_grade.first().id,
-                                                          school_name_id=sql_school_name.first().id)
+                                                          school_id=sql_school_name.first().id)
                     if not sql_paper_name:
-                        Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
-                              grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id).save()
+                        Paper(name=paper_name, year=paper_year, subject_id=sql_subject_name.first().id,
+                              grade_id=sql_grade.first().id, school_id=sql_school_name.first().id).save()
                     sql_paper_name = Paper.objects.filter(name=paper_name)
                     sql_question_type = QuestionTypes.objects.filter(name=question_type)
                     sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
                     paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                                     type_id=sql_question_type.first().id,
                                                     difficulty_id=sql_question_difficult.first().id,
-                                                    paper_name_id=sql_paper_name.first().id)
+                                                    paper_name_id=sql_paper.first().id)
                     knowledgepoints = []
                     print(question_knowledgepoints)
                     for knowledgepoint in question_knowledgepoints:

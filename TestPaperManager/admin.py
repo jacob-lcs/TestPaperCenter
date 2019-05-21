@@ -17,12 +17,12 @@ class GradeAdmin(admin.ModelAdmin):
 
 @admin.register(KnowledgePoint)
 class KnowledgePointAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'subject_name', 'parent']
+    list_display = ['id', 'name', 'subject', 'parent']
 
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'stem', 'answer', 'type', 'difficulty',  'paper_name']
+    list_display = ['id', 'stem', 'answer', 'type', 'difficulty',  'paper']
     pass
 
 
@@ -57,4 +57,4 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Paper)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'year', 'subject_name', 'grade', 'school_name']
+    list_display = ['id', 'name', 'year', 'subject', 'grade', 'school']
