@@ -38,10 +38,27 @@
                 :data="knowledge"
                 @on-change="knowledge_point_change"
                 transfer
-                style=" width: 200px"
+                style=" width: 200px;margin:0 5px"
                 change-on-select
                 placeholder="请选择知识点标签"
               ></Cascader>
+            </div>
+            <!-- 学校筛选器 -->
+            <div class="question-fliter">
+              <strong class="question-fliter-head">学校</strong>
+              <Select
+                v-model="school_selected"
+                multiple
+                filterable
+                style="min-width: 200px;margin:0 5px;width: auto;"
+                placeholder="请输入以搜索学校名称"
+              >
+                <Option
+                  v-for="school in school_list"
+                  :value="school.id"
+                  :key="school.id"
+                >{{school.name}}</Option>
+              </Select>
             </div>
             <draggable v-model="questionSearched" group="question">
               <transition-group>
@@ -195,11 +212,17 @@ export default {
             { name: "判断", selected: true },
             { name: "bulabula", selected: true }
           ]
-        },
+        }
       ],
-      knowledgepoint_list: [], // 题目知识点列表
-      knowledge: [], // 级联选择器的知识点列表
-      paperInfo: { ok: false }
+      knowledgepoint_list: [], // 已选择的知识点列表
+      knowledge: [], // 全部的知识点列表
+      paperInfo: { ok: false },
+      school_selected: [], //已经选择的学校
+      school_list: [
+        { name: "上海中学", id: 1 },
+        { name: "复旦附中", id: 2 },
+        { name: "上大附中", id: 3 }
+      ] ///已经有的学校
     };
   },
   mounted() {
@@ -271,6 +294,31 @@ export default {
           desc: err
         });
       });
+
+    // 查询学校信息
+    this.$axios
+      .get(this.$site + "api/query_school")
+      .then(res => {
+        console.log("query_school", res.data);
+        var schools = [];
+        for (const item in res.data) {
+          if (res.data.hasOwnProperty(item)) {
+            const element = res.data[item];
+            schools.push({
+              id: element.id,
+              name: element.name,
+              selected: true
+            });
+          }
+        }
+        this.school_list = schools;
+      })
+      .catch(err => {
+        this.$Notice.error({
+          title: "查询学校失败",
+          desc: err
+        });
+      });
   },
   computed: {},
   methods: {
@@ -309,7 +357,9 @@ export default {
       this.$axios
         .post(this.$site + "api/search_question", {
           paperInfo: this.paperInfo,
-          filters: this.questionFilters
+          filters: this.questionFilters,
+          knowledge_point: this.knowledgepoint_list,
+          school_selected: this.school_selected
         })
         .then(res => {
           var ok = res.data.ok;
@@ -455,6 +505,7 @@ body,
 .question-fliter-head {
   font-size: 13px;
   margin: 10px 20px;
+  min-width: 40px;
 }
 .question-fliter-item {
   margin: 0 5px;

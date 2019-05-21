@@ -33,9 +33,9 @@
           <FormItem label="试卷抬头">
             <Input v-model="paperInfo.paper_name"></Input>
           </FormItem>
-          <FormItem label="学校">
+          <!-- <FormItem label="学校">
             <Input v-model="paperInfo.school"></Input>
-          </FormItem> 
+          </FormItem>  -->
           <FormItem label="科目">
             <Select v-model="paperInfo.subject">
               <Option v-for="subject in subjects" :value="subject.id" :key="subject.id">{{subject.name}}</Option>
@@ -64,7 +64,7 @@ export default {
       modal_loading: false,
       paperInfo: {
         paper_name: "兰生复旦7年级综合卷",
-        school: "复旦什么学校",
+        // school: "复旦什么学校",  
         subject: 1,
         grade: 1
       },
