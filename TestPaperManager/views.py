@@ -264,7 +264,7 @@ def upload_excel(request):
                     paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                                     type_id=sql_question_type.first().id,
                                                     difficulty_id=sql_question_difficult.first().id,
-                                                    paper_name_id=sql_paper.first().id)
+                                                    paper_name_id=sql_paper_name.first().id)
                     knowledgepoints = []
                     print(question_knowledgepoints)
                     for knowledgepoint in question_knowledgepoints:
@@ -288,10 +288,10 @@ def search_questions(request):
             # print('filters[1]:', filters[1])  # 题型
             condion = Q()
             # 根据年级和科目筛选
-            # subject_id= paperInfo.get('subject')
-            # grade_id= paperInfo.get('subject')
-            # condion |= Q(subject_id)
-            # Question.objects.filter(paper__subject=)
+            subject_id = paperInfo.get('subject')
+            grade_id = paperInfo.get('subject')
+            condion |= Q(paper__subject_id=subject_id)
+            condion |= Q(paper__grade_id=grade_id)
             # 根据难度和题型筛选
             for i in filters[0]['items']:
                 if not i['selected']:
