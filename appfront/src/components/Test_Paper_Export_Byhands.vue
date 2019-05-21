@@ -195,7 +195,7 @@ export default {
             { name: "判断", selected: true },
             { name: "bulabula", selected: true }
           ]
-        }
+        },
       ],
       knowledgepoint_list: [], // 题目知识点列表
       knowledge: [], // 级联选择器的知识点列表
@@ -246,7 +246,7 @@ export default {
           desc: err
         });
       });
-    
+
     // 查询题型
     this.$axios
       .get(this.$site + "api/query_types")
@@ -283,6 +283,7 @@ export default {
           filters: this.questionFilters
         })
         .then(res => {
+          console.log(res);
           var ok = res.data.ok;
           if (ok) {
             this.$Notice.success({

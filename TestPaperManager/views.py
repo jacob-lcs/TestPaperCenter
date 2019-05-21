@@ -278,11 +278,29 @@ def upload_excel(request):
 @csrf_exempt
 def search_questions(request):
     if request.method == 'POST':
+        response = {'ok': False}
         request_data = json.loads(request.body.decode())
         paperInfo = request_data.get('paperInfo', False)
+        filters = request_data.get('filters', False)
         if paperInfo and paperInfo['ok']:
-            print(QuestionDifficulty.objects.all())
-            print(QuestionTypes.objects.all())
-            print(KnowledgePoint.objects.all())
-            pass
-    return JsonResponse({'ok': True})
+            print('paperInfo:', paperInfo)
+            # print('filters[0]:', filters[0])  # 难度
+            # print('filters[1]:', filters[1])  # 题型
+            condion = Q()
+            # 根据年级和科目筛选
+            # subject_id= paperInfo.get('subject')
+            # grade_id= paperInfo.get('subject')
+            # condion |= Q(subject_id)
+            # Question.objects.filter(paper__subject=)
+            # 根据难度和题型筛选
+            for i in filters[0]['items']:
+                if not i['selected']:
+                    condion |= Q(difficulty_id=i['id'])
+            for i in filters[1]['items']:
+                if not i['selected']:
+                    condion |= Q(type_id=i['id'])
+            response['ok'] = True
+            response['data'] = QuestionSerialize(Question.objects.filter(condion), many=True).data
+            return JsonResponse(response, safe=False)
+        return JsonResponse(response)
+    return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})

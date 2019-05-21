@@ -35,7 +35,7 @@
           </FormItem>
           <FormItem label="学校">
             <Input v-model="paperInfo.school"></Input>
-          </FormItem>
+          </FormItem> 
           <FormItem label="科目">
             <Select v-model="paperInfo.subject">
               <Option v-for="subject in subjects" :value="subject.id" :key="subject.id">{{subject.name}}</Option>
@@ -65,8 +65,8 @@ export default {
       paperInfo: {
         paper_name: "兰生复旦7年级综合卷",
         school: "复旦什么学校",
-        subject: "1",
-        grade: "2"
+        subject: 1,
+        grade: 1
       },
       modal_loading: false,
       mode: "auto",
@@ -136,16 +136,15 @@ export default {
       this.showPaperInfo = true;
     },
     confirm() {
-      this.modal_loading = true;
+      // this.modal_loading = true;
       this.$router.push({
         name: "Test_Paper_Export_Byhands",
         params: this.paperInfo
       });
-      setTimeout(() => {
-        this.modal_loading = false;
-        this.modal2 = false;
-        this.$Message.success("Successfully delete");
-      }, 2000);
+      // setTimeout(() => {
+      //   this.modal_loading = false;
+      //   this.modal2 = false;
+      // }, 2000);
     }
   }
 };
