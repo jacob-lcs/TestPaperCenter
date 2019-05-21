@@ -6,6 +6,8 @@ from .models import User, Paper, QuestionDifficulty, QuestionTypes, KnowledgePoi
     Question
 from django.contrib.auth.hashers import make_password, check_password
 from django.forms.models import model_to_dict
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 # 登录接口
@@ -145,7 +147,8 @@ def save_single_topic_selection(request):
         sql_school_name = School.objects.filter(name=school_name)
         sql_subject_name = Subject.objects.filter(name=subject)
         sql_grade = Grade.objects.filter(name=grade)
-        sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
+        sql_paper_name = Paper.objects.filter(name=paper_name, year=paper_year,
+                                              subject_name_id=sql_subject_name.first().id,
                                               grade_id=sql_grade.first().id, school_name_id=sql_school_name.first().id)
         if not sql_paper_name:
             Paper(name=paper_name, year=paper_year, subject_name_id=sql_subject_name.first().id,
@@ -153,7 +156,8 @@ def save_single_topic_selection(request):
         sql_paper_name = Paper.objects.filter(name=paper_name)
         sql_question_type = QuestionTypes.objects.filter(name=question_type)
         sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
-        paper = Question.objects.create(stem=question_stem, answer=question_answer, type_id=sql_question_type.first().id,
+        paper = Question.objects.create(stem=question_stem, answer=question_answer,
+                                        type_id=sql_question_type.first().id,
                                         difficulty_id=sql_question_difficult.first().id,
                                         paper_name_id=sql_paper_name.first().id)
         knowledgepoints = []
@@ -266,3 +270,16 @@ def upload_excel(request):
                         paper.knowledge_point.add(k)
         response = {"res": "success"}
         return JsonResponse(response, safe=False)
+
+
+@csrf_exempt
+def search_questions(request):
+    if request.method == 'POST':
+        request_data = json.loads(request.body.decode())
+        paperInfo = request_data.get('paperInfo', False)
+        if paperInfo and paperInfo['ok']:
+            print(QuestionDifficulty.objects.all())
+            print(QuestionTypes.objects.all())
+            print(KnowledgePoint.objects.all())
+            pass
+    return JsonResponse({'ok': True})

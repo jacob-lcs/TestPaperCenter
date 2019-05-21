@@ -69,7 +69,11 @@
         <div slot="right" class="demo-split-pane">
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
-            <h1>试卷</h1>
+            <div style="display:flex;">
+              <Button type="text" ghost style="margin-left:10px" @click="test">不要点我哦</Button>
+              <h1 style="flex:1">试卷</h1>
+              <Button type="info" style="margin-right:10px">加入分隔线</Button>
+            </div>
             <draggable v-model="questionSelected" group="question">
               <transition-group>
                 <Card v-for="element in questionSelected" :key="element.id" class="question-card">
@@ -95,6 +99,7 @@
 
 <script>
 import draggable from "vuedraggable";
+import { constants } from "fs";
 export default {
   name: "Test_Paper_Export_Mode",
   data() {
@@ -193,12 +198,16 @@ export default {
         }
       ],
       knowledgepoint_list: [], // 题目知识点列表
-      knowledge: [] // 级联选择器的知识点列表
+      knowledge: [], // 级联选择器的知识点列表
+      paperInfo: { ok: false }
     };
   },
   mounted() {
     let that = this;
     //  获取知识点列表
+    console.log("params:", this.$route.params);
+    this.paperInfo = this.$route.params;
+    this.paperInfo.ok = true;
     $.ajax({
       url: that.$site + "api/query_knowledgepoint",
       dataType: "json",
@@ -206,16 +215,123 @@ export default {
         subject: "物理"
       },
       success: function(data) {
-        console.log(data);
+        // console.log(data);
         that.knowledge = [];
         for (var i = 0; i < data.length; i++) {
           that.knowledge.push(data[i]);
         }
       }
     });
+    // 查询难度信息
+    this.$axios
+      .get(this.$site + "api/query_difficulty")
+      .then(res => {
+        // console.log("query_difficulty", res.data);
+        var difficulties = [];
+        for (const item in res.data) {
+          if (res.data.hasOwnProperty(item)) {
+            const element = res.data[item];
+            difficulties.push({
+              id: element.id,
+              name: element.name,
+              selected: true
+            });
+          }
+        }
+        this.questionFilters[0]["items"] = difficulties;
+      })
+      .catch(err => {
+        this.$Notice.error({
+          title: "查询难度信息失败",
+          desc: err
+        });
+      });
+    
+    // 查询题型
+    this.$axios
+      .get(this.$site + "api/query_types")
+      .then(res => {
+        // console.log("query_types", res.data);
+        var difficulties = [];
+        for (const item in res.data) {
+          if (res.data.hasOwnProperty(item)) {
+            const element = res.data[item];
+            difficulties.push({
+              id: element.id,
+              name: element.name,
+              selected: true
+            });
+          }
+        }
+        this.questionFilters[1]["items"] = difficulties;
+      })
+      .catch(err => {
+        this.$Notice.error({
+          title: "查询题型失败",
+          desc: err
+        });
+      });
   },
   computed: {},
   methods: {
+    test() {
+      let that = this;
+      console.log("恭喜你进入测试程序");
+      this.$axios
+        .post(that.$site + "api/search_question", {
+          paperInfo: this.paperInfo,
+          filters: this.questionFilters
+        })
+        .then(res => {
+          var ok = res.data.ok;
+          if (ok) {
+            this.$Notice.success({
+              title: "查找成功",
+              desc: "不写点什么感觉过意不去呢"
+            });
+          } else {
+            this.$Notice.error({
+              title: "查找失败",
+              desc: "不写点什么感觉过意不去呢"
+            });
+          }
+        })
+        .catch(err => {
+          this.$Notice.error({
+            title: "查找失败",
+            desc: err
+          });
+        });
+    },
+    flush_questions() {
+      console.log("更新问题");
+      this.$axios
+        .post(this.$site + "api/search_question", {
+          paperInfo: this.paperInfo,
+          filters: this.questionFilters
+        })
+        .then(res => {
+          var ok = res.data.ok;
+          if (ok) {
+            this.$Notice.success({
+              title: "查找成功",
+              desc: "不写点什么感觉过意不去呢"
+            });
+            console.log(res.data);
+          } else {
+            this.$Notice.error({
+              title: "查找失败",
+              desc: "不写点什么感觉过意不去呢"
+            });
+          }
+        })
+        .catch(err => {
+          this.$Notice.error({
+            title: "查找失败",
+            desc: err
+          });
+        });
+    },
     add(id) {
       this.questionSearched.forEach((item, index, arr) => {
         if (item.id == id) {
@@ -233,13 +349,15 @@ export default {
       });
     },
     question_fliter(e, i, j) {
-      console.log(e, i, j);
+      // console.log(e, i, j);
+      this.flush_questions();
       this.questionFilters[i].items[j].selected = !this.questionFilters[i]
         .items[j].selected;
     },
     // 知识点级联选择变化触发的事件
     knowledge_point_change(value, selectedData) {
-      console.log("触发级联选择器change事件");
+      // console.log("触发级联选择器change事件");
+      this.flush_questions();
       if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
         this.knowledgepoint_list.push(value[value.length - 1]);
       }
@@ -248,6 +366,11 @@ export default {
     knowledgepoint_close(event, name) {
       const index = this.knowledgepoint_list.indexOf(name);
       this.knowledgepoint_list.splice(index, 1);
+    }
+  },
+  watch: {
+    questionFilters() {
+      console.log("questionFilters has changed", this.questionFilters);
     }
   },
   components: {
@@ -277,7 +400,6 @@ export default {
 .question-content {
   text-align: left;
 }
-
 
 .ivu-card-head {
   display: flex;

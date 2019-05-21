@@ -6,12 +6,12 @@ import Test_Paper_Export_Byhands from  '@/components/Test_Paper_Export_Byhands'
 import Test_Paper_Export_Mode from  '@/components/Test_Paper_Export_Mode'
 import home_page from  '@/components/home_page'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
       component: login
     },
@@ -31,7 +31,7 @@ export default new Router({
       component: Test_Paper_Export_Mode
     },
     {
-      path: '/home_page',
+      path: '/',
       name: 'home_page',
       component: home_page
     }

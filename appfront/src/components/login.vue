@@ -4,7 +4,7 @@
 
       <!--左侧信息栏-->
       <div class="sideleft">
-        <p style="font-size: 37px; font-weight: bold;color: #fdfbfb">智能组卷    智慧学习</p>
+        <p style="font-size: 35px; font-weight: bold;color: #fdfbfb">智能组卷    智慧学习</p>
         <p style="font-size: 22px;color: #fdfbfb">大数据结合试题系统 让刷题更轻松</p>
         <div style="margin-top: 30px">
           <p>轻松模板录入，提高试题更新效率。</p>
@@ -46,7 +46,6 @@
     </div>
   </div>
 </template>
-
 <script>
   export default {
     name: "login",
@@ -83,9 +82,9 @@
                 if (data['res'] === "no") {
                   that.$Message.warning('用户名或密码错误');
                 } else {
-                  that.$router.push("Test_Paper_Import");
                   sessionStorage.setItem('per_name', that.formInline.user);
                   sessionStorage.setItem('identity', data['identity'])
+                  that.$router.push("/");
                 }
               }
 
@@ -154,8 +153,9 @@
     background-image: url("../assets/img/bg5.jpg");
     background-repeat: no-repeat;
     background-position: 50% 50%;
-    background-size: 200vh;
+    background-size: 250vh;
     height: 100vh;
+    font-family: "Microsoft YaHei" ! important;
   }
 
 </style>
