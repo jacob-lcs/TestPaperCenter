@@ -12,14 +12,16 @@
             <!-- 选择筛选器 -->
             <div class="question-fliter" v-for="(filter, i) in questionFilters" :key="i">
               <strong class="question-fliter-head">{{filter.name}}</strong>
-              <Button
-                type="info"
-                class="question-fliter-item"
-                @click="e=>{question_fliter(e,i,j)}"
-                v-for="(item, j) in filter.items"
-                :ghost="item.selected"
-                :key="j"
-              >{{item.name}}</Button>
+              <div>
+                <Button
+                  type="info"
+                  class="question-fliter-item"
+                  @click="e=>{question_fliter(e,i,j)}"
+                  v-for="(item, j) in filter.items"
+                  :ghost="item.selected"
+                  :key="j"
+                >{{item.name}}</Button>
+              </div>
             </div>
             <!-- 知识点筛选器 -->
             <div class="question-fliter">
@@ -124,62 +126,62 @@ export default {
       questionSearched: [
         {
           id: 0,
-          name: "xswl",
-          content:
+          stem: "xswl",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 1,
-          name: "cxk",
-          content:
+          stem: "cxk",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 3,
-          name: "789",
-          content:
+          stem: "789",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 4,
-          name: "nmsl",
-          content:
+          stem: "nmsl",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 5,
-          name: "多喝热水",
-          content:
+          stem: "多喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 6,
-          name: "少喝热水",
-          content:
+          stem: "少喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 7,
-          name: "不喝热水",
-          content:
+          stem: "不喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 8,
-          name: "不喝热水",
-          content:
+          stem: "不喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 9,
-          name: "不喝热水",
-          content:
+          stem: "不喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         },
         {
           id: 10,
-          name: "不喝热水",
-          content:
+          stem: "不喝热水",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         }
       ],
@@ -364,6 +366,11 @@ export default {
         .then(res => {
           var ok = res.data.ok;
           if (ok) {
+            this.questionSearched = res.data.data;
+            // for (let i = 0; i < res.data.data.length; i++) {
+            //   const e = res.data.data[i];
+            //   this.questionSearched
+            // }
             this.$Notice.success({
               title: "查找成功",
               desc: "不写点什么感觉过意不去呢"
