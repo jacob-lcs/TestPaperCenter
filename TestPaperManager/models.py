@@ -106,6 +106,7 @@ class Question(models.Model):
 
     stem = models.CharField('题干', max_length=2000)
     answer = models.CharField('答案', max_length=1000)
+    options = models.CharField('选项', max_length=1000)
     type = models.ForeignKey(to='QuestionTypes', on_delete=models.CASCADE, verbose_name='题目类型')
     difficulty = models.ForeignKey(to='QuestionDifficulty', on_delete=models.CASCADE, verbose_name='题目难度')
     paper = models.ForeignKey(to='Paper', on_delete=models.CASCADE, verbose_name='试卷名称')

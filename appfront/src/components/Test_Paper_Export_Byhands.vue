@@ -392,7 +392,7 @@ export default {
     },
     add(id) {
       this.questionSearched.forEach((item, index, arr) => {
-        if (item.id == id) {
+        if (item.id === id) {
           this.questionSelected.push(item);
           arr.splice(index, 1);
         }
@@ -400,7 +400,7 @@ export default {
     },
     remove(id) {
       this.questionSelected.forEach((item, index, arr) => {
-        if (item.id == id) {
+        if (item.id === id) {
           this.questionSearched.push(item);
           arr.splice(index, 1);
         }

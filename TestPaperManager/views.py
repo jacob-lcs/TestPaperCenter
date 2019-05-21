@@ -130,7 +130,7 @@ def query_subjects(request):
     return JsonResponse(response, safe=False)
 
 
-# 保存单选题接口
+# 保存题目接口
 @require_http_methods(['GET'])
 def save_single_topic_selection(request):
     print(request.GET)
@@ -143,9 +143,12 @@ def save_single_topic_selection(request):
     question_stem = request.GET.get('question_stem')
     question_answer = request.GET.get('question_answer')
     question_difficult = request.GET.get('question_difficult')
+    question_options = request.GET.get('question_options')
     question_knowledgepoints = dict(request.GET).get('question_knowledgepoints[list][]')
     sql_school_name = School.objects.filter(name=school_name)
-    if not Question.objects.filter(stem=question_stem, answer=question_answer):
+    print(paper_name)
+    if not Question.objects.filter(stem=question_stem, answer=question_answer, paper__name=paper_name):
+        print(paper_name)
         if not sql_school_name:
             School(name=school_name).save()
         sql_school_name = School.objects.filter(name=school_name)
@@ -163,7 +166,7 @@ def save_single_topic_selection(request):
         paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                         type_id=sql_question_type.first().id,
                                         difficulty_id=sql_question_difficult.first().id,
-                                        paper_id=sql_paper_name.first().id)
+                                        paper_id=sql_paper_name.first().id, options=question_options)
         knowledgepoints = []
         for knowledgepoint in question_knowledgepoints:
             knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
@@ -205,7 +208,7 @@ def query_question_data(request):
     qs = Question.objects.all().order_by('-id')[start:(start + page_count)]
     for q in qs:
         a = {"question_content": q.stem, "question_answer": q.answer, "question_type": q.type.name,
-             "question_difficulty": q.difficulty.name, "paper_name": q.paper_name.name}
+             "question_difficulty": q.difficulty.name, "paper_name": q.paper.name, "question_options": q.options}
         response.append(a)
     return JsonResponse(response, safe=False)
 
@@ -230,23 +233,26 @@ def upload_excel(request):
         file = request.FILES['file']
         error_time = 0
         formatted_excel_data = list(pyexcel_xlsx.get_data(file).values())[0]
-        for i in range(2, len(formatted_excel_data)):
+        for i in range(1, len(formatted_excel_data)):
             if '' in formatted_excel_data[i][0:9] or formatted_excel_data[i] == []:
                 error_time += 1
                 continue
             else:
-                school_name = formatted_excel_data[i][9]
-                paper_name = formatted_excel_data[i][5]
-                paper_year = formatted_excel_data[i][6]
-                grade = formatted_excel_data[i][8]
-                subject = formatted_excel_data[i][7]
-                question_type = formatted_excel_data[i][2]
-                question_stem = formatted_excel_data[i][0]
-                question_answer = formatted_excel_data[i][1]
-                question_difficult = formatted_excel_data[i][3]
-                question_knowledgepoints = formatted_excel_data[i][4].split('；')
+                school_name = formatted_excel_data[i][7]
+                paper_name = formatted_excel_data[i][3]
+                paper_year = formatted_excel_data[i][4]
+                grade = formatted_excel_data[i][6]
+                subject = formatted_excel_data[i][5]
+                question_type = formatted_excel_data[i][0]
+                question_stem = formatted_excel_data[i][8]
+                question_answer = formatted_excel_data[i][9]
+                question_difficult = formatted_excel_data[i][1]
+                question_knowledgepoints = formatted_excel_data[i][2].split('；')
                 sql_school_name = School.objects.filter(name=school_name)
-                if not Question.objects.filter(stem=question_stem, answer=question_answer):
+                question_options = ''
+                for ii in range(10, len(formatted_excel_data[i])):
+                    question_options += formatted_excel_data[i][ii] + "\n"
+                if not Question.objects.filter(stem=question_stem, answer=question_answer, paper__name=paper_name):
                     if not sql_school_name:
                         School(name=school_name).save()
                     sql_school_name = School.objects.filter(name=school_name)
@@ -265,13 +271,14 @@ def upload_excel(request):
                     paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                                     type_id=sql_question_type.first().id,
                                                     difficulty_id=sql_question_difficult.first().id,
-                                                    paper_name_id=sql_paper_name.first().id)
+                                                    paper_id=sql_paper_name.first().id, options=question_options)
                     knowledgepoints = []
                     print(question_knowledgepoints)
                     for knowledgepoint in question_knowledgepoints:
                         knowledgepoints.append(KnowledgePoint.objects.filter(name=knowledgepoint).first().id)
                     for k in knowledgepoints:
                         paper.knowledge_point.add(k)
+        print(error_time)
         response = {"res": "success"}
         return JsonResponse(response, safe=False)
 

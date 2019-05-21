@@ -1,7 +1,7 @@
 <template>
   <div>
     <!--  添加试题dialog  -->
-    <Modal v-model="modal12" draggable scrollable title="创建试题" width="90vw">
+    <Modal v-model="modal12" scrollable title="创建试题" width="90vw">
 
       <p slot="header" style="text-align:center">
         <Icon type="ios-download-outline"></Icon>
@@ -35,7 +35,6 @@
         <!--    试卷年份选择器    -->
         <DatePicker type="year" @on-change="select_year_change" format="yyyy" placeholder="请选择试卷年份" style="width: 200px"
                     transfer></DatePicker>
-        <Button @click="subject_change">测试</Button>
         <br>
 
         <!--  单选题  -->
@@ -51,7 +50,7 @@
             <div v-for="select_option in select_options">
               <Radio style="margin-top: 15px" size="large" :label="select_option.label"></Radio>
               <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                            placeholder="请输入选项内容...." style="margin-top: 5px;"></mavon-editor>
+                            placeholder="请输入选项内容...." style="margin-top: 5px;width:87vw"></mavon-editor>
             </div>
           </RadioGroup>
           <!--  知识点标签  -->
@@ -306,6 +305,10 @@
             key: 'question_answer'
           },
           {
+            title: '题目选项',
+            key: 'question_options'
+          },
+          {
             title: '题目类型',
             key: 'question_type'
           },
@@ -393,7 +396,9 @@
       // 添加选项
       add_select_option() {
         if (this.select_options.length === 24) {
-          this.$Message.warning('最多只能添加24个选项哦');
+          this.$Notice.warning({
+            title: '最多只能添加24个选项哦'
+          })
         } else {
           let label = this.option_title[this.select_options.length];
           let con = {
@@ -438,7 +443,6 @@
 
       // 知识点级联选择变化触发的事件
       knowledge_point_change(value, selectedData) {
-        console.log("触发级联选择器change事件");
         if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
           this.knowledgepoint_list.push(value[value.length - 1]);
         }
@@ -453,11 +457,7 @@
       generate_signal_selection_answer() {
         let that = this;
         for (var i = 0; i < that.select_options.length; i++) {
-          if (that.question_answer_chosen === that.select_options[i]['label']) {
-            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + ".%$@#$%" + that.select_options[i]['content'])
-          } else {
-            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + "." + that.select_options[i]['content'])
-          }
+          that.question_answer = that.question_answer.concat(that.select_options[i]['label'] + "." + that.select_options[i]['content'] + "\n")
         }
         console.log("生成的答案为：", that.question_answer)
       },
@@ -468,18 +468,13 @@
         let that = this;
         that.question_answer = '';
         for (var i = 0; i < that.select_options.length; i++) {
-          if (that.multiple_question_chosen.indexOf(that.select_options[i]['label']) !== -1) {
-            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + ".%$@#$%" + that.select_options[i]['content'])
-          } else {
-            that.question_answer = that.question_answer.concat("lcshchzlm" + that.select_options[i]['label'] + "." + that.select_options[i]['content'])
-          }
+          that.question_answer = that.question_answer.concat(that.select_options[i]['label'] + "." + that.select_options[i]['content'] + "\n")
         }
         console.log("生成的答案为：", that.question_answer)
       },
 
       // 导入试题start
       import_question() {
-        console.log("import_question()");
         let that = this;
         let kk = {'list': that.knowledgepoint_list};
         $.ajax({
@@ -493,17 +488,23 @@
             subject: that.paper_subject,
             question_type: that.topic,
             question_stem: that.question_content,
-            question_answer: that.question_answer,
+            question_answer: that.question_answer_chosen,
+            question_options: that.question_answer,
             question_difficult: that.question_difficulty,
             question_knowledgepoints: kk
           },
           success: function (data) {
             console.log(data);
             if (data['res'] === "success") {
-              that.$Message.info("导入成功！");
+              that.$Notice.success({
+                title: '导入成功'
+              });
+
               that.successfully_import_clear();
             } else {
-              that.$Message.warning("请检查网络！")
+              that.$Notice.warning({
+                title: '请检查网络'
+              });
             }
           }
         });
@@ -514,28 +515,44 @@
       check_paper_content() {
         let that = this;
         if (that.knowledgepoint_list.length === 0) {
-          that.$Message.warning("请选择知识点");
+          that.$Notice.warning({
+            title: '请选择知识点'
+          });
           return false;
         } else if (that.paper_year === '') {
-          that.$Message.warning("请输入年份");
+          that.$Notice.warning({
+            title: '请输入年份'
+          });
           return false;
         } else if (that.paper_name === '') {
-          that.$Message.warning("请输入试卷名称");
+          that.$Notice.warning({
+            title: '请输入试卷名称'
+          });
           return false;
         } else if (that.paper_subject === '') {
-          that.$Message.warning("请选择试卷科目");
+          that.$Notice.warning({
+            title: '请选择试卷科目'
+          });
           return false;
         } else if (that.topic === '') {
-          that.$Message.warning("请选择题目类型");
+          that.$Notice.warning({
+            title: '请选择题目类型'
+          });
           return false;
         } else if (that.grade === '') {
-          that.$Message.warning("请输入年级");
+          that.$Notice.warning({
+            title: '请输入年级'
+          });
           return false;
         } else if (that.school_name === '') {
-          that.$Message.warning("请输入学校名称");
+          that.$Notice.warning({
+            title: '请输入学校名称'
+          });
           return false;
         } else if (that.question_difficulty === '') {
-          that.$Message.warning("请选择题目难度");
+          that.$Notice.warning({
+            title: '请选择题目难度'
+          });
           return false;
         } else {
           return true;
@@ -547,13 +564,19 @@
       check_signal_select_content() {
         let that = this;
         if (that.question_content === '') {
-          that.$Message.warning("请输入题目内容");
+          that.$Notice.warning({
+            title: '请输入题目内容'
+          });
           return false;
         } else if (that.question_answer_chosen === '') {
-          that.$Message.warning("请选择正确答案");
+          that.$Notice.warning({
+            title: '请选择正确答案'
+          });
           return false;
         } else if (!that.check_select_options_has_null()) {
-          that.$Message.warning("请输入选项内容");
+          that.$Notice.warning({
+            title: '请输入选项内容'
+          });
           return false;
         } else {
           return true;
@@ -564,13 +587,19 @@
       check_multiple_select_content() {
         let that = this;
         if (that.multiple_choice_content === '') {
-          that.$Message.warning("请输入题目内容");
+          that.$Notice.warning({
+            title: '请输入题目内容'
+          });
           return false;
         } else if (that.multiple_question_chosen.length === 0) {
-          that.$Message.warning("请选择正确答案");
+          that.$Notice.warning({
+            title: '请选择正确答案'
+          });
           return false;
         } else if (!that.check_select_options_has_null()) {
-          that.$Message.warning("请输入选项内容");
+          that.$Notice.warning({
+            title: '请输入选项内容'
+          });
           return false;
         } else {
           return true;
@@ -582,10 +611,14 @@
       check_essay_question_content() {
         let that = this;
         if (that.question_content === '') {
-          that.$Message.warning("请输入题目内容");
+          that.$Notice.warning({
+            title: '请输入题目内容'
+          });
           return false;
         } else if (that.question_answer === '') {
-          that.$Message.warning("请输入正确答案");
+          that.$Notice.warning({
+            title: '请选择正确答案'
+          });
           return false;
         } else {
           return true;
@@ -606,10 +639,8 @@
 
       // 保存并关闭对话框
       save_and_close() {
-        console.log("导入试题中......");
         let that = this;
         if (that.check_paper_content()) {
-          console.log("进入第二级");
           if (that.topic === "单选题") {
             if (that.check_signal_select_content()) {
               that.generate_signal_selection_answer();
@@ -629,7 +660,9 @@
             }
           } else if (that.topic === "判断题") {
             if (that.question_content === '') {
-              that.$Message.warning("请先输入题干");
+              that.$Notice.warning({
+                title: '情输入题干'
+              });
             } else {
               if (that.true_or_false === '1') {
                 that.question_answer = "正确";
@@ -664,8 +697,6 @@
       // 保存并导入下一个题目
       save_and_dont_close() {
         let that = this;
-        console.log(that.multiple_question_chosen);
-        console.log(that.true_or_false);
         if (that.check_paper_content()) {
           console.log("进入第二级");
           if (that.topic === "单选题") {
@@ -684,7 +715,9 @@
             }
           } else if (that.topic === "判断题") {
             if (that.question_content === '') {
-              that.$Message.warning("请先输入题干");
+              that.$Notice.warning({
+                title: '请输入题干'
+              });
             } else {
               if (that.true_or_false === '1') {
                 that.question_answer = "正确";
@@ -767,7 +800,9 @@
             console.log(data);
             if (data['res'] === "success") {
               console.log("添加成功");
-              that.$Message.success("添加成功！");
+              that.$Notice.success({
+                title: '添加成功'
+              });
               that.subject_change();
             }
           }
@@ -818,7 +853,9 @@
           success: function (data) {
             console.log(data);
             if (data["res"] === "success") {
-              that.$Message.success("删除成功");
+              that.$Notice.success({
+                title: '删除成功'
+              });
               that.page_change(that.current_page);
             }
           }
@@ -827,13 +864,25 @@
 
       // 下载导入模板
       download_template() {
-        window.open('http://127.0.0.1:8000/static/TestPaperManager/excel/import_template.xlsx')
+        this.$Modal.confirm({
+          title: 'Tips',
+          content: '<p>单选题多选题的选项可自由添加及删减，非选择题的选项不填即可，只填入答案</p>',
+          onOk: () => {
+            window.open('http://127.0.0.1:8000/static/TestPaperManager/excel/import_template.xlsx')
+          },
+          onCancel: () => {
+
+          }
+        });
+
       },
 
       //  导入试题成功
       upload_success() {
         let that = this;
-        that.$Message.success("上传成功");
+        that.$Notice.success({
+          title: '上传成功'
+        });
         that.page_change(that.current_page);
       }
 

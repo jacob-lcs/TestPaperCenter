@@ -22,7 +22,7 @@ class KnowledgePointAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['id', 'stem', 'answer', 'type', 'difficulty',  'paper']
+    list_display = ['id', 'stem', 'answer', 'options', 'type', 'difficulty', 'paper']
     pass
 
 
