@@ -17,6 +17,7 @@
     "bootstrap": "^4.3.1",
     "hydrogen-js-sdk": "^1.7.0",
     "iview": "^3.3.3",
+    "marked": "^0.6.2",
     "mavon-editor": "^2.7.3",
     "vue": "^2.6.10",
     "vue-resource": "^1.5.1",

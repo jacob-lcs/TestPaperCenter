@@ -62,7 +62,8 @@
                 >{{school.name}}</Option>
               </Select>
             </div>
-            <draggable v-model="questionSearched" group="question">
+            <h2 v-if="questionSearched.length==0">没有查到结果</h2>
+            <draggable v-else v-model="questionSearched" group="question">
               <transition-group>
                 <Collapse
                   v-for="element in questionSearched"
@@ -70,14 +71,14 @@
                   class="question-card"
                 >
                   <Panel>
-                    {{element.name}}
+                    {{element.stem}}
                     <Icon
                       @click="add(element.id)"
                       style="cursor:pointer"
                       class="add-button"
                       type="md-add"
                     />
-                    <p slot="content" class="question-content">{{element.content}}</p>
+                    <p slot="content" class="question-content">{{element.options}}</p>
                   </Panel>
                 </Collapse>
               </transition-group>
@@ -93,11 +94,12 @@
               <h1 style="flex:1">试卷</h1>
               <Button type="info" style="margin-right:10px">加入分隔线</Button>
             </div>
-            <draggable v-model="questionSelected" group="question">
+            <h2 v-if="questionSelected.length==0" style="padding:20px">还没有题目哦</h2>
+            <draggable v-else v-model="questionSelected" group="question">
               <transition-group>
                 <Card v-for="element in questionSelected" :key="element.id" class="question-card">
                   <p slot="title" class="question-title">
-                    {{element.name}}
+                    {{element.stem}}
                     <Icon
                       @click="remove(element.id)"
                       style="cursor:pointer"
@@ -105,7 +107,7 @@
                       type="md-close"
                     />
                   </p>
-                  <p class="question-content">{{element.content}}</p>
+                  <p class="question-content">{{element.options}}</p>
                 </Card>
               </transition-group>
             </draggable>
@@ -118,7 +120,7 @@
 
 <script>
 import draggable from "vuedraggable";
-import { constants } from "fs";
+import marked from "marked";
 export default {
   name: "Test_Paper_Export_Mode",
   data() {
@@ -188,8 +190,8 @@ export default {
       questionSelected: [
         {
           id: 6,
-          name: "测试样例呢",
-          content:
+          stem: "测试样例呢",
+          options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         }
       ],
@@ -429,6 +431,12 @@ export default {
   watch: {
     questionFilters() {
       console.log("questionFilters has changed", this.questionFilters);
+    }
+  },
+  computed: {
+    compiledMarkdown() {
+      //this.articleDetail.context数据
+      return marked(this.articleDetail.context, { sanitize: true });
     }
   },
   components: {

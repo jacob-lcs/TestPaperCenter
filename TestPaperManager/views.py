@@ -312,8 +312,10 @@ def search_questions(request):
                 condion &= Q(paper__school__id__in=school_selected)
             # 根据难度和题型筛选
             if filters[0]['items']:
+                print('难度：', [i['id'] for i in filters[0]['items'] if not i['selected']])
                 condion &= Q(difficulty_id__in=[i['id'] for i in filters[0]['items'] if not i['selected']])
             if filters[1]['items']:
+                print('题型：', [i['id'] for i in filters[1]['items'] if not i['selected']])
                 condion &= Q(type_id__in=[i['id'] for i in filters[1]['items'] if not i['selected']])
             response['ok'] = True
             response['data'] = QuestionSerialize(Question.objects.filter(condion), many=True).data
