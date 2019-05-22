@@ -866,7 +866,7 @@
       download_template() {
         this.$Modal.confirm({
           title: 'Tips',
-          content: '<p>单选题多选题的选项可自由添加及删减，非选择题的选项不填即可，只填入答案</p>',
+          content: '<p>单选题多选题的选项可自由添加及删减，非选择题的选项不填即可，只填入答案</p><p>知识点请严格按照现有的知识点进行添加，每个知识点之间用中文分号；进行分隔</p>',
           onOk: () => {
             window.open('http://127.0.0.1:8000/static/TestPaperManager/excel/import_template.xlsx')
           },
