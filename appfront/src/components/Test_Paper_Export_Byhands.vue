@@ -90,9 +90,9 @@
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
             <div style="display:flex;">
-              <Button type="text" ghost style="margin-left:10px" @click="test">不要点我哦</Button>
+              <Button type="info" style="margin-left:10px">加入分割线</Button>
               <h1 style="flex:1">试卷</h1>
-              <Button type="info" style="margin-right:10px">加入分隔线</Button>
+              <Button type="success" style="margin-right:10px" @click="export_paper">导出试卷</Button>
             </div>
             <h2 v-if="questionSelected.length==0" style="padding:20px">还没有题目哦</h2>
             <draggable v-else v-model="questionSelected" group="question">
@@ -107,7 +107,11 @@
                       type="md-close"
                     />
                   </p>
-                  <p class="question-content">{{element.options}}</p>
+                  <p class="question-content">
+                    {{element.options}}
+                    <br>
+                    <span v-if="element.id!=-1" style="color:red">答案：{{element.answer}}</span>
+                  </p>
                 </Card>
               </transition-group>
             </draggable>
@@ -189,10 +193,9 @@ export default {
       ],
       questionSelected: [
         {
-          id: 6,
-          stem: "测试样例呢",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          id: -1,
+          stem: "title",
+          options: "试卷说明"
         }
       ],
       split: 0.5,
@@ -234,6 +237,7 @@ export default {
     //  获取知识点列表
     console.log("params:", this.$route.params);
     this.paperInfo = this.$route.params;
+    this.questionSelected[0].stem = this.paperInfo.paper_name;
     this.paperInfo.ok = true;
     $.ajax({
       url: that.$site + "api/query_knowledgepoint",
@@ -323,6 +327,7 @@ export default {
           desc: err
         });
       });
+    this.flush_questions(true);
   },
   computed: {},
   methods: {
@@ -356,15 +361,27 @@ export default {
           });
         });
     },
-    flush_questions() {
-      console.log("更新问题");
+    export_paper() {
       this.$axios
-        .post(this.$site + "api/search_question", {
-          paperInfo: this.paperInfo,
-          filters: this.questionFilters,
-          knowledge_point: this.knowledgepoint_list,
-          school_selected: this.school_selected
+        .post(this.$site + "api/paper_export", this.questionSelected)
+        .then(res => {
+          console.log(res);
         })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    flush_questions(isall = false) {
+      console.log("更新问题");
+      var datas = {
+        paperInfo: this.paperInfo,
+        filters: this.questionFilters,
+        knowledge_point: this.knowledgepoint_list,
+        school_selected: this.school_selected
+      };
+      if (isall) datas = { isall: true };
+      this.$axios
+        .post(this.$site + "api/search_question", datas)
         .then(res => {
           var ok = res.data.ok;
           if (ok) {

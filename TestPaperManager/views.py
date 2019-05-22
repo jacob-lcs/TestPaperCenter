@@ -284,47 +284,6 @@ def upload_excel(request):
 
 
 # zlm's
-@csrf_exempt
-def search_questions(request):
-    if request.method == 'POST':
-        response = {'ok': False}
-        request_data = json.loads(request.body.decode())
-        paperInfo = request_data.get('paperInfo', False)
-        filters = request_data.get('filters', False)
-        knowledge_point = request_data.get('knowledge_point', False)
-        school_selected = request_data.get('school_selected', False)
-        if paperInfo and paperInfo['ok']:
-            print('paperInfo:', paperInfo)
-            # print('filters[0]:', filters[0])  # 难度
-            # print('filters[1]:', filters[1])  # 题型
-            condion = Q()
-            # 根据年级和科目筛选
-            subject_id = paperInfo.get('subject')
-            grade_id = paperInfo.get('grade')
-            condion &= Q(paper__subject_id=subject_id)
-            condion &= Q(paper__grade_id=grade_id)
-            # 根据学校和知识点筛选
-            print("knowledge_point", knowledge_point)
-            print('school_selected', school_selected)
-            if knowledge_point:
-                condion &= Q(knowledge_point__name__in=knowledge_point)
-            if school_selected:
-                condion &= Q(paper__school__id__in=school_selected)
-            # 根据难度和题型筛选
-            if filters[0]['items']:
-                print('难度：', [i['id'] for i in filters[0]['items'] if not i['selected']])
-                condion &= Q(difficulty_id__in=[i['id'] for i in filters[0]['items'] if not i['selected']])
-            if filters[1]['items']:
-                print('题型：', [i['id'] for i in filters[1]['items'] if not i['selected']])
-                condion &= Q(type_id__in=[i['id'] for i in filters[1]['items'] if not i['selected']])
-            response['ok'] = True
-            response['data'] = QuestionSerialize(Question.objects.filter(condion), many=True).data
-            return JsonResponse(response, safe=False)
-        return JsonResponse(response)
-    return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
-
-
-# 查询科目列表接口
 @require_http_methods(["GET"])
 def query_school(request):
     response = []
@@ -332,3 +291,62 @@ def query_school(request):
     for school in schools:
         response.append(model_to_dict(school))
     return JsonResponse(response, safe=False)
+
+
+@csrf_exempt
+def search_questions(request):
+    if request.method == 'POST':
+        response = {'ok': False}
+        request_data = json.loads(request.body.decode())
+        # 获取全部数据all
+        isall = request_data.get('isall', False)
+        if isall:
+            response['ok'] = True
+            response['data'] = QuestionSerialize(Question.objects.all(), many=True).data
+        else:
+            paperInfo = request_data.get('paperInfo', False)
+            filters = request_data.get('filters', False)
+            knowledge_point = request_data.get('knowledge_point', False)
+            school_selected = request_data.get('school_selected', False)
+            if paperInfo and paperInfo['ok']:
+                print('paperInfo:', paperInfo)
+                # print('filters[0]:', filters[0])  # 难度
+                # print('filters[1]:', filters[1])  # 题型
+                condion = Q()
+                # 根据年级和科目筛选
+                subject_id = paperInfo.get('subject')
+                grade_id = paperInfo.get('grade')
+                condion &= Q(paper__subject_id=subject_id)
+                condion &= Q(paper__grade_id=grade_id)
+                # 根据学校和知识点筛选
+                print("knowledge_point", knowledge_point)
+                print('school_selected', school_selected)
+                if knowledge_point:
+                    condion &= Q(knowledge_point__name__in=knowledge_point)
+                if school_selected:
+                    condion &= Q(paper__school__id__in=school_selected)
+                # 根据难度和题型筛选
+                if filters[0]['items']:
+                    print('难度：', [i['id'] for i in filters[0]['items'] if not i['selected']])
+                    condion &= Q(difficulty_id__in=[i['id'] for i in filters[0]['items'] if not i['selected']])
+                if filters[1]['items']:
+                    print('题型：', [i['id'] for i in filters[1]['items'] if not i['selected']])
+                    condion &= Q(type_id__in=[i['id'] for i in filters[1]['items'] if not i['selected']])
+                response['ok'] = True
+                response['data'] = QuestionSerialize(Question.objects.filter(condion), many=True).data
+                return JsonResponse(response, safe=False)
+        return JsonResponse(response)
+    return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
+
+
+# 查询科目列表接口
+
+@csrf_exempt
+def paper_export(request):
+    if request.method == 'POST':
+        response = {'ok': False}
+        request_data = json.loads(request.body.decode())
+        print(request_data)
+        response = {'ok': True}
+        return JsonResponse(response)
+    return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
