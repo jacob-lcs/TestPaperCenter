@@ -32,6 +32,7 @@ class QuestionTypes(models.Model):
         verbose_name_plural = verbose_name
 
     name = models.CharField('题目类型', max_length=200)
+    subject = models.ForeignKey(to='Subject', on_delete=models.CASCADE, related_name='type', verbose_name='学科')
 
     def __str__(self):
         return self.name

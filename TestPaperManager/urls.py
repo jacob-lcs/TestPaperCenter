@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'upload_excel$', views.upload_excel),
     # zlm's
     url(r'search_question$', views.search_questions),
+    url(r'query_school$', views.query_school),
 ]
