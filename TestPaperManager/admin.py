@@ -34,7 +34,7 @@ class QuestionDifficultyAdmin(admin.ModelAdmin):
 
 @admin.register(QuestionTypes)
 class QuestionTypesAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name']
+    list_display = ['id', 'name', 'subject']
     pass
 
 
