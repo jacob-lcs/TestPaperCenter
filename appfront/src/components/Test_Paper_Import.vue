@@ -81,7 +81,7 @@
         </div>
 
         <!--   简答题与计算题     -->
-        <div v-if="topic === '简答题'||topic === '作图题' ||topic === '改写句子'||topic === '作文' ||topic === '听力'||topic === '实验题'||topic === '完形填空'||topic === '将单词改为适当形式填空' ||topic === '现代文阅读' ||topic === '文言文阅读' || topic === '解答题' || topic === '计算题' || topic === '阅读理解' || topic === '语言表达' || topic === '诗歌鉴赏'">
+        <div v-if="topic === '简答题'||topic === '应用题'||topic === '作图题' ||topic === '改写句子'||topic === '作文' ||topic === '听力'||topic === '实验题'||topic === '完形填空'||topic === '将单词改为适当形式填空' ||topic === '现代文阅读' ||topic === '文言文阅读' || topic === '解答题' || topic === '计算题' || topic === '阅读理解' || topic === '语言表达' || topic === '诗歌鉴赏'">
 
           <!--     输入题干     -->
           <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
@@ -617,7 +617,7 @@
               that.import_question();
               that.modal12 = false;
             }
-          } else if (that.topic === '填空题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
+          } else if (that.topic === '填空题'||topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
               that.modal12 = false;
@@ -668,7 +668,7 @@
               that.generate_multiple_selection_answer();
               that.import_question();
             }
-          } else if (that.topic === '填空题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
+          } else if (that.topic === '填空题'||topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
             }
