@@ -13,7 +13,9 @@ import Bmob from "hydrogen-js-sdk";
 import qs from 'qs'
 // 初始化
 Bmob.initialize("955782e687fff4b1a1b268d8b095c115", "7c4a7bb7ae959e2a295ea0f61adddb82");
+import VueClipboard from 'vue-clipboard2'
 
+Vue.use(VueClipboard)
 
 // 挂载到全局使用
 Vue.prototype.Bmob = Bmob;

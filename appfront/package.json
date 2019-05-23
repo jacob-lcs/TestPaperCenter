@@ -15,11 +15,13 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
+    "clipboard": "^2.0.4",
     "hydrogen-js-sdk": "^1.7.0",
     "iview": "^3.3.3",
     "marked": "^0.6.2",
     "mavon-editor": "^2.7.3",
     "vue": "^2.6.10",
+    "vue-clipboard2": "^0.3.0",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.20.0",

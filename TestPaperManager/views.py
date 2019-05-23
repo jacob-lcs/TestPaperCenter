@@ -15,7 +15,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Inches
 
 from .models import User, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
-    Question
+    Question, Img
 from .serialize import QuestionSerialize
 
 
@@ -247,15 +247,15 @@ def upload_excel(request):
                 continue
             else:
                 school_name = formatted_excel_data[i][7]
-                paper_name = formatted_excel_data[i][3]
-                paper_year = formatted_excel_data[i][4]
+                paper_name = formatted_excel_data[i][4]
+                paper_year = formatted_excel_data[i][5]
                 grade = formatted_excel_data[i][6]
-                subject = formatted_excel_data[i][5]
-                question_type = formatted_excel_data[i][0]
+                subject = formatted_excel_data[i][0]
+                question_type = formatted_excel_data[i][1]
                 question_stem = formatted_excel_data[i][8]
                 question_answer = formatted_excel_data[i][9]
-                question_difficult = formatted_excel_data[i][1]
-                question_knowledgepoints = formatted_excel_data[i][2].split('；')
+                question_difficult = formatted_excel_data[i][2]
+                question_knowledgepoints = formatted_excel_data[i][3].split('；')
                 sql_school_name = School.objects.filter(name=school_name)
                 question_options = ''
                 for ii in range(10, len(formatted_excel_data[i])):
@@ -291,7 +291,17 @@ def upload_excel(request):
         return JsonResponse(response, safe=False)
 
 
-# zlm's
+# 上传图片接口
+@csrf_exempt
+def upload_image(request):
+    if request.method == "POST":
+        img = Img(img_url=request.FILES['file'])
+        img.save()
+        print(str(img.img_url))
+        return JsonResponse({'url': str(img.img_url)}, safe=False)
+
+
+# zlm's------------------------------------------------------------
 @require_http_methods(["GET"])
 def query_school(request):
     response = []

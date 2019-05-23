@@ -1,27 +1,42 @@
 <template>
-  <Row
-    type="flex"
-    class="height100"
-    align="middle"
-    justify="center"
-    style="background-color: #eeeeee"
-  >
-    <Col span="7">
-      <Card class="card-button">
-        <div style="text-align:center" @click="export_byhands">
-          <Icon size="200" type="md-hand"/>
-          <h1>手动组卷</h1>
-        </div>
-      </Card>
-    </Col>
-    <Col span="7">
-      <Card class="card-button">
-        <div style="text-align:center" @click="export_auto">
-          <Icon size="200" type="md-color-wand"/>
-          <h1>自动组卷</h1>
-        </div>
-      </Card>
-    </Col>
+  <div class="export_all">
+    <Row type="flex">
+      <Col span="12" offset="2" style="margin-top: 60px">
+        <Carousel autoplay autoplay-speed="2500" v-model="value2" loop>
+          <CarouselItem>
+            <div class="demo-carousel1" style="color: white "></div>
+          </CarouselItem>
+          <CarouselItem>
+            <div class="demo-carousel2"></div>
+          </CarouselItem>
+          <CarouselItem>
+            <div class="demo-carousel3"></div>
+          </CarouselItem>
+         </Carousel>
+      </Col>
+
+      <!--    <Row-->
+      <!--      type="flex"-->
+      <!--      class="heightbelow"-->
+      <!--      align="middle"-->
+      <!--      justify="center"-->
+      <!--    >-->
+      <Col span="7" offset="2" style="margin-top: 100px">
+        <Card class="card-button">
+          <div style="text-align:center" @click="export_byhands">
+            <Icon size="100" type="md-hand" style="margin-top: -20px"/>
+            <h3>手动组卷</h3>
+          </div>
+        </Card>
+
+        <Card class="card-button" style="margin-top: 80px">
+          <div style="text-align:center" @click="export_auto">
+            <Icon size="100" type="md-color-wand" style="margin-top: -20px"/>
+            <h3>自动组卷</h3>
+          </div>
+        </Card>
+      </Col>
+    </Row>
     <!-- 信息填写！ -->
     <Modal v-model="showPaperInfo" width="360">
       <p slot="header" style="color:#f60;text-align:center">
@@ -59,7 +74,8 @@
         <Button type="error" size="large" long :loading="modal_loading" @click="confirm">确定</Button>
       </div>
     </Modal>
-  </Row>
+  <!-- </Row> -->
+  </div>
 </template>
 
 <script>
@@ -156,26 +172,51 @@ export default {
 </script>
 
 <style scope>
-.height100 {
+.export_all {
+  background-image: url("../assets/img/box.png");
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-attachment: fixed;
   height: 100%;
 }
 
+.demo-carousel1 {
+  height: 500px;
+  background-image: url("../assets/img/teacher.jpg");
+  background-size: 50vw auto;
+}
+
+.demo-carousel2 {
+  height: 500px;
+  background-image: url("../assets/img/boy.jpg");
+  background-size: 50vw auto;
+}
+
+.demo-carousel3 {
+  height: 500px;
+  background-image: url("../assets/img/classroom.jpg");
+  background-size: 50vw auto;
+}
+
 .card-button {
-  width: 340px;
-  height: 340px;
-  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.4);
+  width: 320px;
+  height: 160px;
   cursor: pointer;
   padding: 30px;
+  margin-top: 0px;
 }
 
 .ivu-layout-content {
   height: fit-content;
 }
+
 /* .ivu-layout-content {
-  position: absolute;
-  top: 50px;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-} */
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  } */
 </style>
+

@@ -115,3 +115,7 @@ class Question(models.Model):
 
     def __str__(self):
         return self.stem
+
+
+class Img(models.Model):
+    img_url = models.ImageField(upload_to='static/img')
