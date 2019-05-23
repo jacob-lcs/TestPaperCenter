@@ -1,4 +1,6 @@
 import json
+import os
+import pypandoc
 
 import pyexcel_xlsx
 from django.contrib.auth.hashers import check_password
@@ -346,7 +348,23 @@ def paper_export(request):
     if request.method == 'POST':
         response = {'ok': False}
         request_data = json.loads(request.body.decode())
-        print(request_data)
+        # print(request_data)
+        for question in request_data:
+            if question['id'] == -2:
+                print('title:', end='')
+            if question['id'] == -1:
+                print('divide_line:', end='')
+            print(question['stem'])
         response = {'ok': True}
+        md_to_docx(111)
         return JsonResponse(response)
     return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
+
+
+# Tools
+def md_to_docx(md_txt):
+    print(os.listdir('TestPaperManager/use_pandoc'))
+    with open('TestPaperManager/use_pandoc/temp.md', 'w') as f:
+        f.write(md_txt)
+    pypandoc.convert_file(r'TestPaperManager\use_pandoc\temp.md', 'docx',
+                          outputfile=r"TestPaperManager\use_pandoc\temp.docx")

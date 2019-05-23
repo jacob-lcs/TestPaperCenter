@@ -193,7 +193,7 @@ export default {
       ],
       questionSelected: [
         {
-          id: -1,
+          id: -2,
           stem: "title",
           options: "试卷说明"
         }
