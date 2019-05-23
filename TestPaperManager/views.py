@@ -242,15 +242,15 @@ def upload_excel(request):
                 continue
             else:
                 school_name = formatted_excel_data[i][7]
-                paper_name = formatted_excel_data[i][3]
-                paper_year = formatted_excel_data[i][4]
+                paper_name = formatted_excel_data[i][4]
+                paper_year = formatted_excel_data[i][5]
                 grade = formatted_excel_data[i][6]
-                subject = formatted_excel_data[i][5]
-                question_type = formatted_excel_data[i][0]
+                subject = formatted_excel_data[i][0]
+                question_type = formatted_excel_data[i][1]
                 question_stem = formatted_excel_data[i][8]
                 question_answer = formatted_excel_data[i][9]
-                question_difficult = formatted_excel_data[i][1]
-                question_knowledgepoints = formatted_excel_data[i][2].split('；')
+                question_difficult = formatted_excel_data[i][2]
+                question_knowledgepoints = formatted_excel_data[i][3].split('；')
                 sql_school_name = School.objects.filter(name=school_name)
                 question_options = ''
                 for ii in range(10, len(formatted_excel_data[i])):
@@ -373,3 +373,10 @@ def md_to_docx(md_txt):
         f.write(md_txt)
     pypandoc.convert_file(r'TestPaperManager\use_pandoc\temp.md', 'docx',
                           outputfile=r"TestPaperManager\use_pandoc\temp.docx")
+
+
+# 上传图片接口
+def upload_image(request):
+    if request.method == "POST":
+        file = request.FILES['file']
+
