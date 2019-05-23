@@ -607,7 +607,7 @@
               that.import_question();
               that.modal12 = false;
             }
-          } else if (that.topic === '填空题'||topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
+          } else if (that.topic === '填空题'||that.topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
               that.modal12 = false;
@@ -658,7 +658,7 @@
               that.generate_multiple_selection_answer();
               that.import_question();
             }
-          } else if (that.topic === '填空题'||topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
+          } else if (that.topic === '填空题'||that.topic === '应用题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
             }
