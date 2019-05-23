@@ -538,12 +538,7 @@
             title: '请输入题目内容'
           });
           return false;
-        } else if (that.question_answer_chosen === '') {
-          that.$Notice.warning({
-            title: '请选择正确答案'
-          });
-          return false;
-        } else if (!that.check_select_options_has_null()) {
+        }  else if (!that.check_select_options_has_null()) {
           that.$Notice.warning({
             title: '请输入选项内容'
           });
@@ -561,12 +556,7 @@
             title: '请输入题目内容'
           });
           return false;
-        } else if (that.multiple_question_chosen.length === 0) {
-          that.$Notice.warning({
-            title: '请选择正确答案'
-          });
-          return false;
-        } else if (!that.check_select_options_has_null()) {
+        }else if (!that.check_select_options_has_null()) {
           that.$Notice.warning({
             title: '请输入选项内容'
           });
