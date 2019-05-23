@@ -14,7 +14,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Inches
 
 from .models import User, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
-    Question
+    Question, Img
 from .serialize import QuestionSerialize
 
 
@@ -287,10 +287,16 @@ def upload_excel(request):
         response = {"res": "success"}
         return JsonResponse(response, safe=False)
 
+
 # 上传图片接口
+@csrf_exempt
 def upload_image(request):
     if request.method == "POST":
-        file = request.FILES['file']
+        img = Img(img_url=request.FILES.get('image'))
+        img.save()
+        print(str(img.img_url))
+        return JsonResponse({'url': str(img.img_url)}, safe=False)
+
 
 # zlm's------------------------------------------------------------
 @require_http_methods(["GET"])
