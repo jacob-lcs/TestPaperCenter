@@ -223,11 +223,6 @@
                 </Upload>
               </Col>
               <Col span="4" style="text-align: right; ">
-                <Upload action="//127.0.0.1:8000/api/upload_image" :on-success="test11">
-                  <Button type="primary" style="height: 38px; font-size: 15px;" icon="ios-cloud-upload">上传文件</Button>
-                </Upload>
-              </Col>
-              <Col span="4" style="text-align: right; ">
                 <Button icon="md-add" type="primary" style="font-size: 15px;"
                         @click="modal12 = true">添加试题
                 </Button>
@@ -920,13 +915,6 @@
           }
         });
       },
-
-      // 上传图片成功
-      test11(data) {
-        console.log(data)
-        console.log("上传图片成功")
-      }
-
 
     },
 
