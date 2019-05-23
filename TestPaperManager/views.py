@@ -349,22 +349,27 @@ def paper_export(request):
         response = {'ok': False}
         request_data = json.loads(request.body.decode())
         # print(request_data)
-        for question in request_data:
+        data_to_paper = ''
+        for i, question in enumerate(request_data):
             if question['id'] == -2:
-                print('title:', end='')
-            if question['id'] == -1:
-                print('divide_line:', end='')
-            print(question['stem'])
+                data_to_paper += '# '
+            elif question['id'] == -1:
+                data_to_paper += '## '
+            if question['id'] > 0:
+                data_to_paper += '### ' + str(i) + '.' + question['stem'] + '\n\n'
+            else:
+                data_to_paper += question['stem'] + '\n\n'
+            data_to_paper += '- ' + question['options'].replace('\n', '\n\n- ') + '\n\n'
+
         response = {'ok': True}
-        md_to_docx(111)
+        md_to_docx(data_to_paper)
         return JsonResponse(response)
     return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
 
 
 # Tools
 def md_to_docx(md_txt):
-    print(os.listdir('TestPaperManager/use_pandoc'))
-    with open('TestPaperManager/use_pandoc/temp.md', 'w') as f:
+    with open('TestPaperManager/use_pandoc/temp.md', 'w', encoding='utf-8') as f:
         f.write(md_txt)
     pypandoc.convert_file(r'TestPaperManager\use_pandoc\temp.md', 'docx',
                           outputfile=r"TestPaperManager\use_pandoc\temp.docx")

@@ -109,8 +109,14 @@
                   </p>
                   <p class="question-content">
                     {{element.options}}
+                    <Button
+                      v-if="element.id<0"
+                      type="primary"
+                      style="float:right;vertical-align: middle;"
+                      @click="edit_content(element.id)"
+                    >修改</Button>
                     <br>
-                    <span v-if="element.id!=-1" style="color:red">答案：{{element.answer}}</span>
+                    <span v-if="element.id>=0" style="color:red">答案：{{element.answer}}</span>
                   </p>
                 </Card>
               </transition-group>
@@ -236,7 +242,15 @@ export default {
     let that = this;
     //  获取知识点列表
     console.log("params:", this.$route.params);
-    this.paperInfo = this.$route.params;
+    this.paperInfo = {
+      paper_name: "兰生复旦7年级综合卷",
+      subject: 1,
+      grade: 1,
+      ok: true
+    };
+    console.log("this.$route.params", this.$route.params);
+    if (Object.keys(this.$route.params).length)
+      this.paperInfo = this.$route.params;
     this.questionSelected[0].stem = this.paperInfo.paper_name;
     this.paperInfo.ok = true;
     $.ajax({
@@ -331,6 +345,12 @@ export default {
   },
   computed: {},
   methods: {
+    edit_content(id) {
+      var question_now = this.questionSelected.find(q => {
+        return q.id === id;
+      });
+      // todo 修改content
+    },
     test() {
       let that = this;
       console.log("恭喜你进入测试程序");
@@ -482,6 +502,7 @@ export default {
 
 .question-content {
   text-align: left;
+  display: flow-root;
 }
 
 .ivu-card-head {
