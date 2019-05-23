@@ -25,7 +25,7 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = ['id', 'stem', 'answer', 'options', 'type', 'difficulty', 'paper']
     pass
 
-
+    
 @admin.register(QuestionDifficulty)
 class QuestionDifficultyAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
