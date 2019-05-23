@@ -116,7 +116,7 @@
                   <p class="question-content">
                     {{element.options}}
                     <Button
-                      v-if="element.id<0"
+                      v-if="element.id<=0"
                       type="primary"
                       style="float:right;vertical-align: middle;"
                       @click="edit_content(element.id)"
