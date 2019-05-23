@@ -125,3 +125,5 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",  # 在系统文件路径查找
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # 在Apps的路径下查找
 )  # 这是查找的方法
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # media即为图片上传的根路径
