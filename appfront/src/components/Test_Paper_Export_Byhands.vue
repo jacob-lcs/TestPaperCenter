@@ -90,9 +90,14 @@
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
             <div style="display:flex;">
-              <Button type="info" style="margin-left:10px">加入分割线</Button>
+              <Button type="info" style="margin-left:10px" @click="add_detail">加入题型说明</Button>
               <h1 style="flex:1">试卷</h1>
-              <Button type="success" style="margin-right:10px" @click="export_paper">导出试卷</Button>
+              <Button
+                type="success"
+                style="margin-right:10px"
+                @click="export_paper"
+                :loading="export_button_loading"
+              >导出试卷</Button>
             </div>
             <h2 v-if="questionSelected.length==0" style="padding:20px">还没有题目哦</h2>
             <draggable v-else v-model="questionSelected" group="question">
@@ -101,6 +106,7 @@
                   <p slot="title" class="question-title">
                     {{element.stem}}
                     <Icon
+                      v-if="element.id>0"
                       @click="remove(element.id)"
                       style="cursor:pointer"
                       class="remove-button"
@@ -235,7 +241,8 @@ export default {
         { name: "上海中学", id: 1 },
         { name: "复旦附中", id: 2 },
         { name: "上大附中", id: 3 }
-      ] ///已经有的学校
+      ], ///已经有的学校
+      export_button_loading: false
     };
   },
   mounted() {
@@ -345,6 +352,14 @@ export default {
   },
   computed: {},
   methods: {
+    add_detail(){
+      this.questionSelected.push(
+        {
+          id: -1,
+          stem: "选择题",
+          options: "题型说明"
+        });
+    },
     edit_content(id) {
       var question_now = this.questionSelected.find(q => {
         return q.id === id;
@@ -382,13 +397,30 @@ export default {
         });
     },
     export_paper() {
+      this.export_button_loading = true;
       this.$axios
         .post(this.$site + "api/paper_export", this.questionSelected)
         .then(res => {
           console.log(res);
+          if (res.data.ok) {
+            this.$Notice.success({
+              title: "导出成功"
+            });
+            this.export_button_loading = false;
+          } else {
+            this.$Notice.error({
+              title: "导出失败"
+            });
+            this.export_button_loading = false;
+          }
         })
         .catch(err => {
           console.log(err);
+          this.$Notice.error({
+            title: "导出失败",
+            desc: err
+          });
+          this.export_button_loading = false;
         });
     },
     flush_questions(isall = false) {
@@ -429,6 +461,7 @@ export default {
           });
         });
     },
+    // 拖拽列表的添加和删除事件
     add(id) {
       this.questionSearched.forEach((item, index, arr) => {
         if (item.id === id) {
