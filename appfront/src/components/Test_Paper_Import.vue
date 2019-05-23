@@ -7,6 +7,16 @@
         <Icon type="ios-download-outline"></Icon>
         <span>添加试题</span>
       </p>
+      <Upload
+        multiple
+        type="drag"
+        :on-success="upload_image_success"
+        action="//127.0.0.1:8000/api/upload_image">
+        <div style="padding: 20px 0">
+          <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+          <p>上传图片以获得链接</p>
+        </div>
+      </Upload>
       <div>
 
         <div style="margin-top: 15px; margin-bottom:15px; text-align: center">
@@ -15,34 +25,38 @@
           <!--    学校名称输入    -->
           <Input size="large" v-model="school_name" placeholder="请输入学校名称" style="width: 300px;"/>
         </div>
-        <!--  年级选择器  -->
-        <Select v-model="grade" style="width:200px" transfer placeholder="请选择年级">
-          <Option v-for="item in grade_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
-        </Select>
-        <!--  科目选择器  -->
-        <Select v-model="paper_subject" style="width:200px" transfer placeholder="请选择科目" @on-change="subject_change">
-          <Option v-for="item in subject_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
-        </Select>
-        <!--  题型选择器  -->
-        <Select v-model="topic" style="width:200px" @on-change="topic_change" transfer placeholder="请选择题目类型">
-          <Option v-for="item in topicList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-        </Select>
-        <!--  试题难度选择器  -->
-        <Select v-model="question_difficulty" style="width:200px" transfer placeholder="请选择试题难度">
-          <Option v-for="item in question_difficulty_list" :value="item.value" :key="item.value">{{ item.label }}
-          </Option>
-        </Select>
-        <!--    试卷年份选择器    -->
-        <DatePicker type="year" @on-change="select_year_change" format="yyyy" placeholder="请选择试卷年份" style="width: 200px"
-                    transfer></DatePicker>
-        <br>
+        <div style="text-align: center">
+          <!--  年级选择器  -->
+          <Select v-model="grade" style="width:200px;margin-right: 10px" transfer placeholder="请选择年级">
+            <Option v-for="item in grade_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+          <!--  科目选择器  -->
+          <Select v-model="paper_subject" style="width:200px;margin-right: 10px" transfer placeholder="请选择科目" @on-change="subject_change">
+            <Option v-for="item in subject_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+          <!--  题型选择器  -->
+          <Select v-model="topic" style="width:200px;margin-right: 10px" @on-change="topic_change" transfer placeholder="请选择题目类型">
+            <Option v-for="item in topicList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+          </Select>
+          <!--  试题难度选择器  -->
+          <Select v-model="question_difficulty" style="width:200px;margin-right: 10px" transfer placeholder="请选择试题难度">
+            <Option v-for="item in question_difficulty_list" :value="item.value" :key="item.value">{{ item.label }}
+            </Option>
+          </Select>
+
+          <!--    试卷年份选择器    -->
+          <DatePicker type="year" @on-change="select_year_change" format="yyyy" placeholder="请选择试卷年份"
+                      style="width: 200px"
+                      transfer></DatePicker>
+          <br>
+        </div>
 
 
         <!--  选择题  -->
         <div v-if="topic === '选择题'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_content" :toolbars="toolbars" ref="md3" @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>选项</Divider>
 
@@ -50,7 +64,8 @@
           <CheckboxGroup v-model="multiple_question_chosen" vertical>
             <div v-for="select_option in select_options">
               <Checkbox style="margin-top: 15px" size="large" :label="select_option.label"></Checkbox>
-              <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+              <mavon-editor v-model="select_option.content" :toolbars="toolbars" ref=md @imgAdd="$imgAdd"
+                            @imgDel="$imgDel"
                             placeholder="请输入选项内容...." style="margin-top: 5px;"></mavon-editor>
             </div>
           </CheckboxGroup>
@@ -85,12 +100,12 @@
           v-if="topic === '简答题'||topic === '应用题'||topic === '作图题' ||topic === '改写句子'||topic === '作文' ||topic === '听力'||topic === '实验题'||topic === '完形填空'||topic === '将单词改为适当形式填空' ||topic === '现代文阅读' ||topic === '文言文阅读' || topic === '解答题' || topic === '计算题' || topic === '阅读理解' || topic === '语言表达' || topic === '诗歌鉴赏'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_content" :toolbars="toolbars" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>答案</Divider>
 
           <!--     问答题答案    -->
-          <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_answer" :toolbars="toolbars" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入答案...." style="margin-top: 5px;"></mavon-editor>
           <!--     知识点标签     -->
           <div v-if="paper_subject !== ''">
@@ -117,12 +132,12 @@
         <div v-if="topic === '填空题'||topic === '默写'||topic === '选词填空'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_content" :toolbars="toolbars" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干，空使用”____“表示" style="margin-top: 15px"></mavon-editor>
           <Divider>答案</Divider>
 
           <!--     填空题答案    -->
-          <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_answer" :toolbars="toolbars" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入答案，答案与答案之间使用”；；“分离" style="margin-top: 5px;"></mavon-editor>
           <!--     知识点标签     -->
           <div v-if="paper_subject !== ''">
@@ -149,7 +164,7 @@
         <div v-if="topic === '判断题'">
 
           <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
+          <mavon-editor v-model="question_content" :toolbars="toolbars" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
                         placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
           <Divider>答案</Divider>
 
@@ -241,6 +256,7 @@
 </template>
 
 <script>
+  let tt = this;
   import {mavonEditor} from 'mavon-editor'
 
   export default {
@@ -287,20 +303,20 @@
             align: 'center',
             render: (h, params) => {
               return h('div', [
-                h('Button', {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  style: {
-                    marginRight: '5px'
-                  },
-                  on: {
-                    click: () => {
-                      console.log(params)
-                    }
-                  }
-                }, 'View'),
+                // h('Button', {
+                //   props: {
+                //     type: 'primary',
+                //     size: 'small'
+                //   },
+                //   style: {
+                //     marginRight: '5px'
+                //   },
+                //   on: {
+                //     click: () => {
+                //       console.log(params)
+                //     }
+                //   }
+                // }, 'View'),
                 h('Button', {
                   props: {
                     type: 'error',
@@ -349,7 +365,40 @@
         page_count: 30,  // 一页显示的数据数量
         current_page: 1, // 当前页码
         true_answer: '',
-
+        toolbars: {
+          bold: true, // 粗体
+          italic: true, // 斜体
+          header: true, // 标题
+          underline: true, // 下划线
+          strikethrough: true, // 中划线
+          mark: true, // 标记
+          superscript: true, // 上角标
+          subscript: true, // 下角标
+          quote: true, // 引用
+          ol: true, // 有序列表
+          ul: true, // 无序列表
+          link: true, // 链接
+          code: true, // code
+          table: true, // 表格
+          fullscreen: true, // 全屏编辑
+          readmodel: true, // 沉浸式阅读
+          htmlcode: true, // 展示html源码
+          help: true, // 帮助
+          /* 1.3.5 */
+          undo: true, // 上一步
+          redo: true, // 下一步
+          trash: true, // 清空
+          save: true, // 保存（触发events中的save事件）
+          /* 1.4.2 */
+          navigation: true, // 导航目录
+          /* 2.1.8 */
+          alignleft: true, // 左对齐
+          aligncenter: true, // 居中
+          alignright: true, // 右对齐
+          /* 2.2.1 */
+          subfield: true, // 单双栏模式
+          preview: true, // 预览
+        }
       }
     },
     methods: {
@@ -383,6 +432,7 @@
 
       // 图片上传
       $imgAdd(pos, $file) {
+
         let that = this;
         // 第一步.将图片上传到服务器.
         var formdata = new FormData();
@@ -400,19 +450,10 @@
            * 2. 通过$refs获取: html声明ref : `<mavon-editor ref=md ></mavon-editor>，`$vm`为 `this.$refs.md`
            */
           console.log(res.data);
-          that.$refs.md.$img2Url(pos,that.$site + 'media/' + res.data['url']);
+          that.$refs.md.$img2Url(pos, that.$site + 'media/' + res.data['url']);
+          // tt.mavonEditor.$img2Url(pos, url);
         });
       },
-      // $imgAdd(pos, $file) {
-      //   let that = this;
-      //   let file = Bmob.File($file.name, $file);
-      //   file.save().then(res => {
-      //     console.log(res.length);
-      //     console.log(res);
-      //     // 将图片链接改为图片地址
-      //     that.$refs.md.$img2Url(pos, res[0]['url']);
-      //   })
-      // },
 
       // 删除图片触发的操作
       $imgDel(pos, $file) {
@@ -470,69 +511,68 @@
       import_question() {
         let that = this;
         let kk = {'list': that.knowledgepoint_list};
-        if(that.topic === "选择题"){
+        if (that.topic === "选择题") {
           $.ajax({
-          url: that.$site + "api/save_single_topic_selection",
-          dataType: "json",
-          data: {
-            school_name: that.school_name,
-            paper_name: that.paper_name,
-            paper_year: that.paper_year,
-            grade: that.grade,
-            subject: that.paper_subject,
-            question_type: that.topic,
-            question_stem: that.question_content,
-            question_answer: that.true_answer,
-            question_options: that.question_answer,
-            question_difficult: that.question_difficulty,
-            question_knowledgepoints: kk
-          },
-          success: function (data) {
-            console.log(data);
-            if (data['res'] === "success") {
-              that.$Notice.success({
-                title: '导入成功'
-              });
-              that.successfully_import_clear();
-            } else {
-              that.$Notice.warning({
-                title: '请检查网络'
-              });
+            url: that.$site + "api/save_single_topic_selection",
+            dataType: "json",
+            data: {
+              school_name: that.school_name,
+              paper_name: that.paper_name,
+              paper_year: that.paper_year,
+              grade: that.grade,
+              subject: that.paper_subject,
+              question_type: that.topic,
+              question_stem: that.question_content,
+              question_answer: that.true_answer,
+              question_options: that.question_answer,
+              question_difficult: that.question_difficulty,
+              question_knowledgepoints: kk
+            },
+            success: function (data) {
+              console.log(data);
+              if (data['res'] === "success") {
+                that.$Notice.success({
+                  title: '导入成功'
+                });
+                that.successfully_import_clear();
+              } else {
+                that.$Notice.warning({
+                  title: '请检查网络'
+                });
+              }
             }
-          }
-        });
-        }
-        else{
+          });
+        } else {
           $.ajax({
-          url: that.$site + "api/save_single_topic_selection",
-          dataType: "json",
-          data: {
-            school_name: that.school_name,
-            paper_name: that.paper_name,
-            paper_year: that.paper_year,
-            grade: that.grade,
-            subject: that.paper_subject,
-            question_type: that.topic,
-            question_stem: that.question_content,
-            question_answer: that.question_answer,
-            question_options: '',
-            question_difficult: that.question_difficulty,
-            question_knowledgepoints: kk
-          },
-          success: function (data) {
-            console.log(data);
-            if (data['res'] === "success") {
-              that.$Notice.success({
-                title: '导入成功'
-              });
-              that.successfully_import_clear();
-            } else {
-              that.$Notice.warning({
-                title: '请检查网络'
-              });
+            url: that.$site + "api/save_single_topic_selection",
+            dataType: "json",
+            data: {
+              school_name: that.school_name,
+              paper_name: that.paper_name,
+              paper_year: that.paper_year,
+              grade: that.grade,
+              subject: that.paper_subject,
+              question_type: that.topic,
+              question_stem: that.question_content,
+              question_answer: that.question_answer,
+              question_options: '',
+              question_difficult: that.question_difficulty,
+              question_knowledgepoints: kk
+            },
+            success: function (data) {
+              console.log(data);
+              if (data['res'] === "success") {
+                that.$Notice.success({
+                  title: '导入成功'
+                });
+                that.successfully_import_clear();
+              } else {
+                that.$Notice.warning({
+                  title: '请检查网络'
+                });
+              }
             }
-          }
-        })
+          })
         }
 
       },
@@ -915,6 +955,20 @@
           }
         });
       },
+
+      // 上传图片成功触发的函数
+      upload_image_success(response) {
+        console.log(response);
+        let that = this;
+        this.$copyText("![](" + this.$site + 'media/' + response['url'] + ")").then(function (e) {
+          that.$Notice.success({
+            title: '已复制到粘贴版’'
+          });
+          console.log(e)
+        }, function (e) {
+          console.log(e)
+        })
+      }
 
     },
 

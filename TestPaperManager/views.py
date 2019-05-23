@@ -292,7 +292,7 @@ def upload_excel(request):
 @csrf_exempt
 def upload_image(request):
     if request.method == "POST":
-        img = Img(img_url=request.FILES.get('image'))
+        img = Img(img_url=request.FILES['file'])
         img.save()
         print(str(img.img_url))
         return JsonResponse({'url': str(img.img_url)}, safe=False)
