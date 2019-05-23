@@ -37,50 +37,9 @@
                     transfer></DatePicker>
         <br>
 
-        <!--  单选题  -->
-        <div v-if="topic === '单选题'">
 
-          <!--     输入题干     -->
-          <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                        placeholder="请输入题干...." style="margin-top: 15px"></mavon-editor>
-          <Divider>选项</Divider>
-
-          <!-- 选择题选项 -->
-          <RadioGroup v-model="question_answer_chosen" vertical>
-            <div v-for="select_option in select_options">
-              <Radio style="margin-top: 15px" size="large" :label="select_option.label"></Radio>
-              <mavon-editor v-model="select_option.content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                            placeholder="请输入选项内容...." style="margin-top: 5px;width:87vw"></mavon-editor>
-            </div>
-          </RadioGroup>
-          <!--  知识点标签  -->
-          <div v-if="paper_subject !== ''">
-            <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
-                 style="margin-top: 15px">
-              {{ item }}
-            </Tag>
-            <Row>
-              <div class="inline" style="margin-top: 15px; display: flex">
-                <Cascader :data="knowledge" @on-change="knowledge_point_change"
-                          transfer style=" width: 200px" change-on-select
-                          placeholder="请选择知识点标签"></Cascader>
-                <Poptip trigger="hover" content="没有找到知识点？点击添加" transfer>
-                  <Icon type="md-add" size="20" style="margin-top: 5px; margin-left: 10px;cursor: pointer"
-                        @click="add_knowledge_point"/>
-                </Poptip>
-              </div>
-            </Row>
-          </div>
-
-          <!--     添加和删除选项     -->
-          <div style="margin-top: 15px">
-            <Button shape="circle" icon="md-add" type="primary" @click="add_select_option">添加选项</Button>
-            <Button shape="circle" icon="md-close" type="error" @click="delete_select_option">删除选项</Button>
-          </div>
-        </div>
-
-        <!--  多选题  -->
-        <div v-if="topic === '多选题'">
+        <!--  选择题  -->
+        <div v-if="topic === '选择题'">
 
           <!--     输入题干     -->
           <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
@@ -122,7 +81,7 @@
         </div>
 
         <!--   简答题与计算题     -->
-        <div v-if="topic === '简答题' || topic === '计算题'">
+        <div v-if="topic === '简答题'||topic === '作图题' ||topic === '改写句子'||topic === '作文' ||topic === '听力'||topic === '实验题'||topic === '完形填空'||topic === '将单词改为适当形式填空' ||topic === '现代文阅读' ||topic === '文言文阅读' || topic === '解答题' || topic === '计算题' || topic === '阅读理解' || topic === '语言表达' || topic === '诗歌鉴赏'">
 
           <!--     输入题干     -->
           <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
@@ -154,7 +113,7 @@
         </div>
 
         <!--   填空题     -->
-        <div v-if="topic === '填空题'">
+        <div v-if="topic === '填空题'||topic === '默写'||topic === '选词填空'">
 
           <!--     输入题干     -->
           <mavon-editor v-model="question_content" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
@@ -163,7 +122,7 @@
 
           <!--     填空题答案    -->
           <mavon-editor v-model="question_answer" ref=md @imgAdd="$imgAdd" @imgDel="$imgDel"
-                        placeholder="请输入填空题答案，答案与答案之间使用”；；“分离" style="margin-top: 5px;"></mavon-editor>
+                        placeholder="请输入答案，答案与答案之间使用”；；“分离" style="margin-top: 5px;"></mavon-editor>
           <!--     知识点标签     -->
           <div v-if="paper_subject !== ''">
             <Tag v-for="item in knowledgepoint_list" :key="item" :name="item" closable @on-close="knowledgepoint_close"
@@ -388,6 +347,7 @@
         data_count: 0,  // 数据总数
         page_count: 30,  // 一页显示的数据数量
         current_page: 1, // 当前页码
+        true_answer:'',
 
       }
     },
@@ -456,6 +416,7 @@
       // 生成单选题答案
       generate_signal_selection_answer() {
         let that = this;
+
         for (var i = 0; i < that.select_options.length; i++) {
           that.question_answer = that.question_answer.concat(that.select_options[i]['label'] + "." + that.select_options[i]['content'] + "\n")
         }
@@ -466,11 +427,20 @@
       // 生成多选题答案
       generate_multiple_selection_answer() {
         let that = this;
+        console.log("选择题答案为：", that.multiple_question_chosen.length);
         that.question_answer = '';
+        for(var j=0; j<that.multiple_question_chosen.length; j++){
+          if (j === 0){
+            that.true_answer = '';
+          }
+          that.true_answer +=(that.multiple_question_chosen[j] + '；');
+        }
         for (var i = 0; i < that.select_options.length; i++) {
+          console.log("进入2循环");
           that.question_answer = that.question_answer.concat(that.select_options[i]['label'] + "." + that.select_options[i]['content'] + "\n")
         }
-        console.log("生成的答案为：", that.question_answer)
+        console.log("生成的答案为：",that.true_answer);
+
       },
 
       // 导入试题start
@@ -488,7 +458,7 @@
             subject: that.paper_subject,
             question_type: that.topic,
             question_stem: that.question_content,
-            question_answer: that.question_answer_chosen,
+            question_answer: that.true_answer,
             question_options: that.question_answer,
             question_difficult: that.question_difficulty,
             question_knowledgepoints: kk
@@ -641,19 +611,13 @@
       save_and_close() {
         let that = this;
         if (that.check_paper_content()) {
-          if (that.topic === "单选题") {
-            if (that.check_signal_select_content()) {
-              that.generate_signal_selection_answer();
-              that.import_question();
-              that.modal12 = false;
-            }
-          } else if (that.topic === "多选题") {
+          if (that.topic === "选择题") {
             if (that.check_multiple_select_content()) {
               that.generate_multiple_selection_answer();
               that.import_question();
               that.modal12 = false;
             }
-          } else if (that.topic === "简答题" || that.topic === "计算题" || that.topic === "判断题") {
+          } else if (that.topic === '填空题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
               that.modal12 = false;
@@ -699,17 +663,12 @@
         let that = this;
         if (that.check_paper_content()) {
           console.log("进入第二级");
-          if (that.topic === "单选题") {
-            if (that.check_signal_select_content()) {
-              that.generate_signal_selection_answer();
-              that.import_question();
-            }
-          } else if (that.topic === "多选题") {
+          if (that.topic === "选择题") {
             if (that.check_multiple_select_content()) {
               that.generate_multiple_selection_answer();
               that.import_question();
             }
-          } else if (that.topic === "简答题" || that.topic === "计算题" || that.topic === "判断题") {
+          } else if (that.topic === '填空题'||that.topic === '默写'||that.topic === '选词填空'||that.topic === '简答题'||that.topic === '作图题' ||that.topic === '改写句子'||that.topic === '作文' ||that.topic === '听力'||that.topic === '实验题'||that.topic === '完形填空'||that.topic === '将单词改为适当形式填空' ||that.topic === '现代文阅读' ||that.topic === '文言文阅读' || that.topic === '解答题' || that.topic === '计算题' || that.topic === '阅读理解' || that.topic === '语言表达' || that.topic === '诗歌鉴赏') {
             if (that.check_essay_question_content()) {
               that.import_question();
             }
@@ -743,6 +702,7 @@
       subject_change() {
         let that = this;
         //  获取知识点列表
+        that.topic = '';
         $.ajax({
           url: that.$site + "api/query_knowledgepoint",
           dataType: "json",
@@ -777,6 +737,7 @@
             }
           }
         });
+        that.query_question_types(that.paper_subject)
       },
 
       // 添加知识点
@@ -884,6 +845,28 @@
           title: '上传成功'
         });
         that.page_change(that.current_page);
+      },
+
+      //获取题目类型
+      query_question_types(subject) {
+        let that = this;
+        $.ajax({
+          url: that.$site + "api/query_types",
+          dataType: "json",
+          data: {
+            subject:subject
+          },
+          success: function (data) {
+            console.log(data);
+            that.topicList = [];
+            for (var i = 0; i < data.length; i++) {
+              that.topicList.push({
+                value: data[i]['name'],
+                label: data[i]['name']
+              })
+            }
+          }
+        });
       }
 
 
@@ -914,21 +897,6 @@
         }
       });
 
-      //  获取题目类型列表
-      $.ajax({
-        url: that.$site + "api/query_types",
-        dataType: "json",
-        data: {},
-        success: function (data) {
-          console.log(data);
-          for (var i = 0; i < data.length; i++) {
-            that.topicList.push({
-              value: data[i]['name'],
-              label: data[i]['name']
-            })
-          }
-        }
-      });
 
       //  获取科目列表
       $.ajax({

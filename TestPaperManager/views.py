@@ -58,7 +58,8 @@ def query_difficulty(request):
 @require_http_methods(["GET"])
 def query_types(request):
     response = []
-    types = QuestionTypes.objects.all()
+    subject = request.GET.get('subject')
+    types = QuestionTypes.objects.filter(subject__name=subject)
     for type in types:
         response.append(model_to_dict(type))
     return JsonResponse(response, safe=False)
@@ -161,7 +162,7 @@ def save_single_topic_selection(request):
             Paper(name=paper_name, year=paper_year, subject_id=sql_subject_name.first().id,
                   grade_id=sql_grade.first().id, school_id=sql_school_name.first().id).save()
         sql_paper_name = Paper.objects.filter(name=paper_name)
-        sql_question_type = QuestionTypes.objects.filter(name=question_type)
+        sql_question_type = QuestionTypes.objects.filter(name=question_type, subject__name=subject)
         sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
         paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                         type_id=sql_question_type.first().id,
@@ -340,7 +341,6 @@ def search_questions(request):
 
 
 # 查询科目列表接口
-
 @csrf_exempt
 def paper_export(request):
     if request.method == 'POST':
