@@ -271,7 +271,7 @@ def upload_excel(request):
                         Paper(name=paper_name, year=paper_year, subject_id=sql_subject_name.first().id,
                               grade_id=sql_grade.first().id, school_id=sql_school_name.first().id).save()
                     sql_paper_name = Paper.objects.filter(name=paper_name)
-                    sql_question_type = QuestionTypes.objects.filter(name=question_type)
+                    sql_question_type = QuestionTypes.objects.filter(name=question_type, subject__name=subject)
                     sql_question_difficult = QuestionDifficulty.objects.filter(name=question_difficult)
                     paper = Question.objects.create(stem=question_stem, answer=question_answer,
                                                     type_id=sql_question_type.first().id,
