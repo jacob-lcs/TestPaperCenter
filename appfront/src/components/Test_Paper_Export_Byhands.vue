@@ -63,6 +63,7 @@
               </Select>
             </div>
             <h2 v-if="questionSearched.length==0">没有查到结果</h2>
+            <!-- 左侧拖拽列表 -->
             <draggable v-else v-model="questionSearched" group="question">
               <transition-group>
                 <Collapse
@@ -71,21 +72,43 @@
                   class="question-card"
                 >
                   <Panel>
-                    {{element.stem}}
+                    <div class="question-header" v-html="compiledMarkdown(element.stem,true)"></div>
                     <Icon
                       @click="add(element.id)"
                       style="cursor:pointer"
                       class="add-button"
                       type="md-add"
                     />
-                    <p slot="content" class="question-content">{{element.options}}</p>
+                    <!-- <p slot="content" class="question-content">{{element.options}}</p> -->
+
+                    <div
+                      v-if="element.type===2|element.type===3|element.type===7|element.type===8"
+                      slot="content"
+                      class="question-content"
+                      v-html="compiledMarkdown(element.options)"
+                    ></div>
+                    <div slot="content" v-else>
+                      <mavon-editor
+                        v-model="element.stem"
+                        :subfield="false"
+                        :defaultOpen="'preview'"
+                        :toolbarsFlag="false"
+                        :boxShadow="false"
+                      />
+                    </div>
+                    <!-- <div
+                      v-else
+                      slot="content"
+                      class="question-content"
+                      v-html="compiledMarkdown(element.stem)"
+                    ></div>-->
                   </Panel>
                 </Collapse>
               </transition-group>
             </draggable>
           </Scroll>
         </div>
-        <!-- 右侧栏目 -->
+        <!-- 右侧栏目-==================================================================== -->
         <div slot="right" class="demo-split-pane">
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
@@ -103,8 +126,8 @@
             <draggable v-else v-model="questionSelected" group="question">
               <transition-group>
                 <Card v-for="element in questionSelected" :key="element.id" class="question-card">
-                  <p slot="title" class="question-title">
-                    {{element.stem}}
+                  <div slot="title" class="question-title">
+                    <div class="question-detail" v-html="compiledMarkdown(element.stem,true)"></div>
                     <Icon
                       v-if="element.id>0"
                       @click="remove(element.id)"
@@ -112,15 +135,50 @@
                       class="remove-button"
                       type="md-close"
                     />
-                  </p>
+                  </div>
                   <p class="question-content">
-                    {{element.options}}
+                    <mavon-editor
+                      v-if="element.id>0"
+                      v-model="element.stem"
+                      :subfield="false"
+                      :defaultOpen="'preview'"
+                      :toolbarsFlag="false"
+                      :boxShadow="false"
+                    />
+                    <mavon-editor
+                      v-model="element.options"
+                      :subfield="false"
+                      :defaultOpen="'preview'"
+                      :toolbarsFlag="false"
+                      :boxShadow="false"
+                    />
                     <Button
                       v-if="element.id<=0"
                       type="primary"
                       style="float:right;vertical-align: middle;"
                       @click="edit_content(element.id)"
                     >修改</Button>
+
+                    <Modal v-model="showQuestionDetail" width="360" :on-ok="flush_detail">
+                      <p slot="header" style="color:#f60;text-align:center">
+                        <!-- <Icon type="ios-information-circle"></Icon> -->
+                        <span>请输入题型信息</span>
+                      </p>
+                      <div style="text-align:center">
+                        <Form :model="questionDetail" label-position="left" :label-width="100">
+                          <FormItem label="题型名">
+                            <Input v-model="questionDetail.name"></Input>
+                          </FormItem>
+                          <FormItem label="题型说明">
+                            <Input v-model="questionDetail.detail"></Input>
+                          </FormItem>
+                        </Form>
+                      </div>
+                      <div slot="footer">
+                        <Button type="error" size="large" long @click="flush_detail">确定</Button>
+                      </div>
+                    </Modal>
+
                     <br>
                     <span v-if="element.id>=0" style="color:red">答案：{{element.answer}}</span>
                   </p>
@@ -137,10 +195,17 @@
 <script>
 import draggable from "vuedraggable";
 import marked from "marked";
+import { mavonEditor } from "mavon-editor";
 export default {
   name: "Test_Paper_Export_Mode",
   data() {
     return {
+      showQuestionDetail: false,
+      question_now_id: 0,
+      questionDetail: {
+        name: "",
+        detail: ""
+      },
       questionSearched: [
         {
           id: 0,
@@ -301,9 +366,11 @@ export default {
 
     // 查询题型
     this.$axios
-      .get(this.$site + "api/query_types")
+      .get(this.$site + "api/query_types", {
+        params: { subject: this.paperInfo.subject }
+      })
       .then(res => {
-        // console.log("query_types", res.data);
+        console.log("query_types", res.data);
         var difficulties = [];
         for (const item in res.data) {
           if (res.data.hasOwnProperty(item)) {
@@ -352,18 +419,27 @@ export default {
   },
   computed: {},
   methods: {
-    add_detail(){
-      this.questionSelected.push(
-        {
-          id: -1,
-          stem: "选择题",
-          options: "题型说明"
-        });
+    flush_detail() {
+      var question_now = this.questionSelected.find(q => {
+        return this.question_now_id === q.id;
+      });
+      question_now.stem = this.questionDetail.name;
+      question_now.options = this.questionDetail.detail;
+      this.showQuestionDetail = false;
+    },
+    get_first(context) {
+      return context;
+    },
+    add_detail() {
+      this.questionSelected.push({
+        id: -1,
+        stem: "选择题",
+        options: "题型说明"
+      });
     },
     edit_content(id) {
-      var question_now = this.questionSelected.find(q => {
-        return q.id === id;
-      });
+      this.question_now_id = id;
+      this.showQuestionDetail = true;
       // todo 修改content
     },
     test() {
@@ -505,8 +581,14 @@ export default {
   },
   computed: {
     compiledMarkdown() {
-      //this.articleDetail.context数据
-      return marked(this.articleDetail.context, { sanitize: true });
+      return (context, first = false) => {
+        if (first) {
+          if (context.length > 20) {
+            return marked(context.substr(0, 20) + "...", { sanitize: true });
+          }
+        }
+        return marked(context, { sanitize: true });
+      };
     }
   },
   components: {
@@ -531,6 +613,8 @@ export default {
 
 .question-title {
   text-align: left;
+  display: flex;
+  width: 100%;
 }
 
 .question-content {
@@ -556,10 +640,6 @@ export default {
 
 .ivu-collapse-item {
   text-align: left;
-}
-
-.ivu-collapse-header {
-  font-size: 17px;
 }
 
 .question-content {
@@ -602,5 +682,31 @@ body,
 }
 .ivu-layout {
   background: #fff;
+}
+/* 搞定左边的显示 */
+.ivu-collapse-header {
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+}
+.question-header {
+  flex: 1;
+}
+.v-note-wrapper {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+.v-note-wrapper .v-note-panel .v-note-show .v-show-content {
+  background: #fff !important;
+}
+.v-note-wrapper .v-note-panel {
+  border: 0px !important;
+}
+.question-detail {
+  flex: 1;
+}
+.v-note-wrapper {
+  z-index: 20 !important;
 }
 </style>

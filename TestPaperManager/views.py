@@ -1,5 +1,6 @@
 import json
 import re
+import requests
 
 import pyexcel_xlsx
 import pypandoc
@@ -63,7 +64,9 @@ def query_difficulty(request):
 def query_types(request):
     response = []
     subject = request.GET.get('subject')
-    types = QuestionTypes.objects.filter(subject__name=subject)
+    types = QuestionTypes.objects.filter(subject_id=subject)
+    if not types.exists():
+        types = QuestionTypes.objects.filter(subject__name=subject)
     for type in types:
         response.append(model_to_dict(type))
     return JsonResponse(response, safe=False)
@@ -341,12 +344,14 @@ def search_questions(request):
                 if school_selected:
                     condion &= Q(paper__school__id__in=school_selected)
                 # 根据难度和题型筛选
-                if filters[0]['items']:
-                    print('难度：', [i['id'] for i in filters[0]['items'] if not i['selected']])
-                    condion &= Q(difficulty_id__in=[i['id'] for i in filters[0]['items'] if not i['selected']])
-                if filters[1]['items']:
-                    print('题型：', [i['id'] for i in filters[1]['items'] if not i['selected']])
-                    condion &= Q(type_id__in=[i['id'] for i in filters[1]['items'] if not i['selected']])
+                difficulty = [i['id'] for i in filters[0]['items'] if not i['selected']]
+                if difficulty:
+                    print('难度：', difficulty)
+                    condion &= Q(difficulty_id__in=difficulty)
+                type = [i['id'] for i in filters[1]['items'] if not i['selected']]
+                if len(filters[1]['items']):
+                    print('题型：', type)
+                    condion &= Q(type_id__in=type)
                 response['ok'] = True
                 response['data'] = QuestionSerialize(Question.objects.filter(condion), many=True).data
                 return JsonResponse(response, safe=False)
@@ -362,13 +367,15 @@ def paper_export(request):
         request_data = json.loads(request.body.decode())
         # print(request_data)
         data_to_paper = ''
+        n = 1
         for i, question in enumerate(request_data):
             # 这是stem
             if question['id'] == -2:
                 # title==$$$$
                 data_to_paper += '$$$$ '
             if question['id'] > 0:
-                data_to_paper += str(i) + '、 ' + question['stem'] + '\n\n'
+                data_to_paper += str(n) + '、 ' + question['stem'] + '\n\n'
+                n += 1
             else:
                 data_to_paper += question['stem'] + '\n\n'
             # 这是options
@@ -379,6 +386,7 @@ def paper_export(request):
             data_to_paper += '$$ ' + question['options'].replace('\n', '\n\n$$ ') + '\n\n'
 
         response = {'ok': True}
+        data_to_paper = re.sub('!\[.*\](?=\(.*\))', "${I'm_a_photo}", data_to_paper)
         md_to_docx(data_to_paper)
         return JsonResponse(response)
     return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
@@ -388,11 +396,12 @@ def paper_export(request):
 def md_to_docx(md_txt):
     md_path = r"TestPaperManager/use_pandoc/temp.md"
     docx_path = r"TestPaperManager\use_pandoc\temp.docx"
+    img_path = r"TestPaperManager\use_pandoc\temp.jpg"
 
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_txt)
     pypandoc.convert_file(md_path, 'docx',
-                          outputfile=docx_path)
+                          outputfile=docx_path, extra_args=['--pdf-engine=xelatex'])
     # 然后再把word读进去进行一下格式上的修饰
     document = Document(docx_path)
     for paragraph in document.paragraphs:
@@ -405,5 +414,15 @@ def md_to_docx(md_txt):
         elif re.match('^\${2} .*', text):
             paragraph.paragraph_format.left_indent = Inches(0.3)
         #  删除段落标记！！！！！
-        paragraph.text = re.sub('(^\${4}|^\${3}|^\${2})', '', paragraph.text)
+        result_url = re.findall("(?<=[$]\{I.m_a_photo\}\().*(?=\))", paragraph.text)
+        for url in result_url:
+            img = requests.get(url)
+            with open(img_path, 'wb') as f:
+                f.write(img.content)
+            document.add_picture(img_path, width=Inches(1.25))
+        paragraph.text = re.sub('(^\${4}|^\${3}|^\${2}|[$]\{I.m_a_photo\}\(.*?\))', '', paragraph.text)
     document.save(docx_path)
+
+
+def auto_export(request):
+    pass
