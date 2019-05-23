@@ -16,7 +16,7 @@
     </Col>
     <Col span="7">
       <Card class="card-button">
-        <div style="text-align:center" @click="export_byhands">
+        <div style="text-align:center" @click="export_auto">
           <Icon size="200" type="md-color-wand"/>
           <h1>自动组卷</h1>
         </div>
@@ -33,12 +33,19 @@
           <FormItem label="试卷抬头">
             <Input v-model="paperInfo.paper_name"></Input>
           </FormItem>
-          <!-- <FormItem label="学校">
-            <Input v-model="paperInfo.school"></Input>
-          </FormItem>  -->
+          <FormItem v-if="mode==='auto'" label="总分">
+            <Input v-model="paperInfo.score"></Input>
+          </FormItem>
+          <FormItem v-if="mode==='auto'" label="题目数量">
+            <Input v-model="paperInfo.question_num"></Input>
+          </FormItem>
           <FormItem label="科目">
             <Select v-model="paperInfo.subject">
-              <Option v-for="subject in subjects" :value="subject.id" :key="subject.id">{{subject.name}}</Option>
+              <Option
+                v-for="subject in subjects"
+                :value="subject.id"
+                :key="subject.id"
+              >{{subject.name}}</Option>
             </Select>
           </FormItem>
           <FormItem label="年级" style="margin-bottom:0px">
@@ -46,7 +53,7 @@
               <Option v-for="grade in grades" :value="grade.id" :key="grade.id">{{grade.name}}</Option>
             </Select>
           </FormItem>
-        </Form> 
+        </Form>
       </div>
       <div slot="footer">
         <Button type="error" size="large" long :loading="modal_loading" @click="confirm">确定</Button>
@@ -64,9 +71,11 @@ export default {
       modal_loading: false,
       paperInfo: {
         paper_name: "兰生复旦7年级综合卷",
-        // school: "复旦什么学校",  
+        // school: "复旦什么学校",
         subject: 1,
-        grade: 1
+        grade: 1,
+        score: 100,
+        question_num: 10
       },
       modal_loading: false,
       mode: "auto",
@@ -98,7 +107,7 @@ export default {
           title: "查询题型失败",
           desc: err
         });
-      }); 
+      });
     // 查询年级
     this.$axios
       .get(this.$site + "api/query_grades")
@@ -136,15 +145,11 @@ export default {
       this.showPaperInfo = true;
     },
     confirm() {
-      // this.modal_loading = true;
-      this.$router.push({
-        name: "Test_Paper_Export_Byhands",
-        params: this.paperInfo
-      });
-      // setTimeout(() => {
-      //   this.modal_loading = false;
-      //   this.modal2 = false;
-      // }, 2000);
+      if (this.mode === "manual")
+        this.$router.push({
+          name: "Test_Paper_Export_Byhands",
+          params: this.paperInfo
+        });
     }
   }
 };
