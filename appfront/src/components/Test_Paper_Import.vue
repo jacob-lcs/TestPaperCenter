@@ -552,7 +552,7 @@
       // 检查多选题输入的内容
       check_multiple_select_content() {
         let that = this;
-        if (that.multiple_choice_content === '') {
+        if (that.question_content === '') {
           that.$Notice.warning({
             title: '请输入题目内容'
           });
