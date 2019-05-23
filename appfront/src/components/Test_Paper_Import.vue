@@ -382,12 +382,13 @@
 
       // 图片上传
       $imgAdd(pos, $file) {
+        let that = this;
         let file = Bmob.File($file.name, $file);
         file.save().then(res => {
           console.log(res.length);
           console.log(res);
           // 将图片链接改为图片地址
-          this.$refs.md.$img2Url(pos, res[0]['url']);
+          that.$refs.md.$img2Url(pos, res[0]['url']);
         })
       },
 

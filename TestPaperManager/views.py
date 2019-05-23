@@ -1,15 +1,17 @@
 import json
-import os
-import pypandoc
+import re
 
 import pyexcel_xlsx
+import pypandoc
 from django.contrib.auth.hashers import check_password
 from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.core import serializers
+from docx import Document
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.shared import Inches
 
 from .models import User, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
     Question
@@ -242,15 +244,15 @@ def upload_excel(request):
                 continue
             else:
                 school_name = formatted_excel_data[i][7]
-                paper_name = formatted_excel_data[i][3]
-                paper_year = formatted_excel_data[i][4]
+                paper_name = formatted_excel_data[i][4]
+                paper_year = formatted_excel_data[i][5]
                 grade = formatted_excel_data[i][6]
-                subject = formatted_excel_data[i][5]
-                question_type = formatted_excel_data[i][0]
+                subject = formatted_excel_data[i][0]
+                question_type = formatted_excel_data[i][1]
                 question_stem = formatted_excel_data[i][8]
                 question_answer = formatted_excel_data[i][9]
-                question_difficult = formatted_excel_data[i][1]
-                question_knowledgepoints = formatted_excel_data[i][2].split('；')
+                question_difficult = formatted_excel_data[i][2]
+                question_knowledgepoints = formatted_excel_data[i][3].split('；')
                 sql_school_name = School.objects.filter(name=school_name)
                 question_options = ''
                 for ii in range(10, len(formatted_excel_data[i])):
@@ -285,8 +287,12 @@ def upload_excel(request):
         response = {"res": "success"}
         return JsonResponse(response, safe=False)
 
+# 上传图片接口
+def upload_image(request):
+    if request.method == "POST":
+        file = request.FILES['file']
 
-# zlm's
+# zlm's------------------------------------------------------------
 @require_http_methods(["GET"])
 def query_school(request):
     response = []
@@ -351,15 +357,20 @@ def paper_export(request):
         # print(request_data)
         data_to_paper = ''
         for i, question in enumerate(request_data):
+            # 这是stem
             if question['id'] == -2:
-                data_to_paper += '# '
-            elif question['id'] == -1:
-                data_to_paper += '## '
+                # title==$$$$
+                data_to_paper += '$$$$ '
             if question['id'] > 0:
-                data_to_paper += '### ' + str(i) + '.' + question['stem'] + '\n\n'
+                data_to_paper += str(i) + '、 ' + question['stem'] + '\n\n'
             else:
                 data_to_paper += question['stem'] + '\n\n'
-            data_to_paper += '- ' + question['options'].replace('\n', '\n\n- ') + '\n\n'
+            # 这是options
+            if question['id'] == -2:
+                # title.options==$$$
+                # non-title.options==$$
+                data_to_paper += '$'
+            data_to_paper += '$$ ' + question['options'].replace('\n', '\n\n$$ ') + '\n\n'
 
         response = {'ok': True}
         md_to_docx(data_to_paper)
@@ -369,7 +380,24 @@ def paper_export(request):
 
 # Tools
 def md_to_docx(md_txt):
-    with open('TestPaperManager/use_pandoc/temp.md', 'w', encoding='utf-8') as f:
+    md_path = r"TestPaperManager/use_pandoc/temp.md"
+    docx_path = r"TestPaperManager\use_pandoc\temp.docx"
+
+    with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_txt)
-    pypandoc.convert_file(r'TestPaperManager\use_pandoc\temp.md', 'docx',
-                          outputfile=r"TestPaperManager\use_pandoc\temp.docx")
+    pypandoc.convert_file(md_path, 'docx',
+                          outputfile=docx_path)
+    # 然后再把word读进去进行一下格式上的修饰
+    document = Document(docx_path)
+    for paragraph in document.paragraphs:
+        text = paragraph.text  # 打印各段落内容文本
+        if re.match('^\${4} .*', text):
+            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+            paragraph.runs[0].bold = True
+        elif re.match('^\${3} .*', text):
+            paragraph.paragraph_format.first_line_indent = Inches(0.3)
+        elif re.match('^\${2} .*', text):
+            paragraph.paragraph_format.left_indent = Inches(0.3)
+        #  删除段落标记！！！！！
+        paragraph.text = re.sub('(^\${4}|^\${3}|^\${2})', '', paragraph.text)
+    document.save(docx_path)
