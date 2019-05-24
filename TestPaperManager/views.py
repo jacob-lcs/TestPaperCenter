@@ -215,7 +215,7 @@ def query_question_data(request):
     start = (start - 1) * page_count
     qs = Question.objects.all().order_by('-id')[start:(start + page_count)]
     for q in qs:
-        a = {"question_content": q.stem, "question_answer": q.answer, "question_type": q.type.name,
+        a = {"id": q.id, "question_content": q.stem, "question_answer": q.answer, "question_type": q.type.name,
              "question_difficulty": q.difficulty.name, "paper_name": q.paper.name, "question_options": q.options}
         response.append(a)
     return JsonResponse(response, safe=False)
@@ -299,6 +299,21 @@ def upload_image(request):
         img.save()
         print(str(img.img_url))
         return JsonResponse({'url': str(img.img_url)}, safe=False)
+
+
+# 获取一道题的所有内容
+@require_http_methods('GET')
+def get_question_all_content(request):
+    question_id = request.GET.get('question_id')
+    print(question_id)
+    question = Question.objects.filter(id=question_id)
+    result = question.first()
+    print(result)
+    response = {"stem": result.stem, "answer": result.answer, "difficulty": result.difficulty.name,
+                "paper": result.paper.name, "type": result.type.name, "options": result.options,
+                "school": result.paper.school.name, "year": result.paper.year, "grade": result.paper.grade.name,
+                "subject": result.paper.subject.name}
+    return JsonResponse(response, safe=False)
 
 
 # zlm's------------------------------------------------------------
