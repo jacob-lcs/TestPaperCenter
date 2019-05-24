@@ -27,7 +27,6 @@ def login(request):
     password = request.GET.get('psw')
     res = User.objects.filter(name=name)
     pas = res.first().password
-    print(pas)
     ress = check_password(password, pas)
     if ress:
         identity = res.first().identity
@@ -425,7 +424,7 @@ def paper_export(request):
 
 # Tools
 def md_to_docx(md_txt, filename):
-    md_path = r"TestPaperManager/use_pandoc/temp.md"
+    md_path = r"TestPaperManager/static/TestPaperManager/md/temp.md"
     docx_path = r"TestPaperManager/static/TestPaperManager/docx/" + filename[:8] + '/' + filename + ".docx"
 
     with open(md_path, 'w', encoding='utf-8') as f:
