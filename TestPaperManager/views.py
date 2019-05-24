@@ -476,7 +476,7 @@ def auto_export(request):
                 data_to_paper += CHINESE_NUMBER[m] + "、 " + QuestionTypes.objects.get(id=i['type']).name + '\n\n'
                 m += 1
                 # 加入题目
-                for j in numpy.random.choice(qs, size=i['num'], replace=False):
+                for j in numpy.random.choice(qs, size=int(i['num']), replace=False):
                     data_to_paper += str(n) + '、 ' + j.stem + '\n\n'
                     data_to_paper += j.options.replace('\n', '\n\n') + '\n\n'
                     n += 1
