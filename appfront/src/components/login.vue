@@ -85,7 +85,7 @@
                   })
                 } else {
                   sessionStorage.setItem('per_name', that.formInline.user);
-                  sessionStorage.setItem('identity', data['identity'])
+                  sessionStorage.setItem('identity', data['identity']);
                   that.$router.push("/");
                 }
               }

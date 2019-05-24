@@ -64,9 +64,9 @@ def query_difficulty(request):
 def query_types(request):
     response = []
     subject = request.GET.get('subject')
-    types = QuestionTypes.objects.filter(subject_id=subject)
+    types = QuestionTypes.objects.filter(subject__name=subject)
     if not types.exists():
-        types = QuestionTypes.objects.filter(subject__name=subject)
+        types = QuestionTypes.objects.filter(subject_id=subject)
     for type in types:
         response.append(model_to_dict(type))
     return JsonResponse(response, safe=False)

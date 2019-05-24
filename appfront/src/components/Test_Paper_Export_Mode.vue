@@ -93,13 +93,18 @@ export default {
         score: 100,
         question_num: 10
       },
-      modal_loading: false,
       mode: "auto",
       subjects: [],
       grades: []
     };
   },
   mounted() {
+    // 路径保护
+      if (sessionStorage.getItem('per_name') === null || sessionStorage.getItem('identity') === 'keyboarder') {
+        this.$router.push("/")
+      } else {
+        console.log(sessionStorage.getItem('per_name'))
+      }
     // 查询题型
     this.$axios
       .get(this.$site + "api/query_subjects")

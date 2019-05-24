@@ -7,8 +7,10 @@
       </Poptip>
     </div>
     <!--  显示用户名  -->
-    <div style="text-align: right;padding-top: 10px;margin-right: 20px; font-size: 20px" v-if="per_name.length !== 0">
-      <p style="margin-right: 10px; font-size: 20px">{{per_name}}, 欢迎 </p>
+    <div style="text-align: right;padding-top: 10px;margin-right: 20px; font-size: 20px; cursor: pointer" v-if="per_name.length !== 0" @click="quit_login">
+      <Poptip trigger="hover" content="点击退出登录" placement="left">
+        <p style="margin-right: 10px; font-size: 20px">{{per_name}}, 欢迎 </p>
+      </Poptip>
     </div>
     <!--左侧信息栏-->
     <div class="sideleft">
@@ -46,24 +48,41 @@
   export default {
     name: "home_page",
     data() {
-      return{
-        per_name:''
+      return {
+        per_name: ''
       }
     },
     methods: {
       paper_import() {
-        console.log("点击导入按钮");
-        this.$router.push("/Test_Paper_Import");
+        if (sessionStorage.getItem('per_name') === null) {
+          this.$Message.warning("您没有权限，请先登录！")
+        } else {
+          console.log(sessionStorage.getItem('per_name'));
+          console.log("点击导入按钮");
+          this.$router.push("/Test_Paper_Import");
+        }
+
       },
 
       paper_export() {
-        console.log("点击导出按钮");
-        this.$router.push("/Test_Paper_Export_Mode");
+        if (sessionStorage.getItem('per_name') === null || sessionStorage.getItem('identity') === 'keyboarder') {
+          this.$Message.warning("您没有权限，请先登录！")
+        } else {
+          console.log(sessionStorage.getItem('per_name'));
+          console.log("点击导出按钮");
+          this.$router.push("/Test_Paper_Export_Mode");
+        }
       },
 
       // 点击登录按钮
       login_click() {
         this.$router.push("/login")
+      },
+
+      // 退出登录
+      quit_login(){
+        sessionStorage.clear();
+        this.$router.push('/login')
       }
     },
     mounted() {

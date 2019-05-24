@@ -265,6 +265,7 @@
       return {
         paper_name: '',  // 试卷名称
         paper_year: '',  // 试卷年份
+        per_name: '',
         paper_subject: '', // 已经选择的试卷科目
         subject_list: [],  // 科目选择器的科目列表
         modal12: false,  // 导入试题对话框显示标志位
@@ -975,11 +976,12 @@
     mounted() {
       let that = this;
       // 路径保护
-      // if (sessionStorage.getItem('per_name') == null) {
-      //   this.$router.push("/")
-      // } else {
-      //   console.log(sessionStorage.getItem('per_name'))
-      // }
+      if (sessionStorage.getItem('per_name') === null) {
+        this.$router.push("/")
+      } else {
+        console.log(sessionStorage.getItem('per_name'))
+        this.per_name = sessionStorage.getItem('per_name')
+      }
 
       //  获取题目难度列表
       $.ajax({
