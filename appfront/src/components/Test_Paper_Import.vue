@@ -9,7 +9,7 @@
         <FormItem label="试题内容">
           <Input v-model="question_content_detail.stem" readonly></Input>
         </FormItem>
-        <FormItem label="试题内容">
+        <FormItem label="选项内容">
           <Input v-model="question_content_detail.options" readonly></Input>
         </FormItem>
         <FormItem label="试题答案">

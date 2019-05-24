@@ -21,5 +21,6 @@ urlpatterns = [
     # zlm's
     url(r'search_question$', views.search_questions),
     url(r'query_school$', views.query_school),
-    url(r'paper_export$', views.paper_export)
+    url(r'paper_export$', views.paper_export),
+    url(r'auto_export$', views.auto_export)
 ]
