@@ -1,6 +1,6 @@
 import json
-import re
-import requests
+import numpy.random
+import os, zipfile
 
 import pyexcel_xlsx
 import pypandoc
@@ -10,13 +10,13 @@ from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from docx import Document
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.shared import Inches
 
 from .models import User, QuestionDifficulty, QuestionTypes, KnowledgePoint, Grade, Subject, School, Paper, \
     Question, Img
 from .serialize import QuestionSerialize
+
+STATIC_PATH = r"TestPaperManager/static/TestPaperManager/"
+CHINESE_NUMBER = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二']
 
 
 # 登录接口
@@ -64,9 +64,11 @@ def query_difficulty(request):
 def query_types(request):
     response = []
     subject = request.GET.get('subject')
-    types = QuestionTypes.objects.filter(subject_id=subject)
-    if not types.exists():
+    if request.GET.get('id', False):
+        types = QuestionTypes.objects.filter(subject_id=subject)
+    else:
         types = QuestionTypes.objects.filter(subject__name=subject)
+
     for type in types:
         response.append(model_to_dict(type))
     return JsonResponse(response, safe=False)
@@ -76,7 +78,11 @@ def query_types(request):
 @require_http_methods(['GET'])
 def query_knowledgepoint(request):
     subject = request.GET.get('subject')
-    subject_id = Subject.objects.filter(name=subject).first().id
+
+    if request.GET.get('id', False):
+        subject_id = int(subject)
+    else:
+        subject_id = Subject.objects.filter(name=subject).first().id
 
     # 递归查询
     def search_children(a, b):
@@ -349,7 +355,7 @@ def search_questions(request):
                     print('难度：', difficulty)
                     condion &= Q(difficulty_id__in=difficulty)
                 type = [i['id'] for i in filters[1]['items'] if not i['selected']]
-                if len(filters[1]['items']):
+                if type:
                     print('题型：', type)
                     condion &= Q(type_id__in=type)
                 response['ok'] = True
@@ -365,64 +371,109 @@ def paper_export(request):
     if request.method == 'POST':
         response = {'ok': False}
         request_data = json.loads(request.body.decode())
-        # print(request_data)
-        data_to_paper = ''
-        n = 1
-        for i, question in enumerate(request_data):
-            # 这是stem
-            if question['id'] == -2:
-                # title==$$$$
-                data_to_paper += '$$$$ '
-            if question['id'] > 0:
-                data_to_paper += str(n) + '、 ' + question['stem'] + '\n\n'
-                n += 1
-            else:
-                data_to_paper += question['stem'] + '\n\n'
-            # 这是options
-            if question['id'] == -2:
-                # title.options==$$$
-                # non-title.options==$$
-                data_to_paper += '$'
-            data_to_paper += '$$ ' + question['options'].replace('\n', '\n\n$$ ') + '\n\n'
+        randomKey = request_data.get('randomKey', False)
+        questionSelected = request_data.get('questionSelected', False)
+        print(questionSelected)
+        for has_answer in [0, 1]:
+            data_to_paper = ''
+            # 大题号
+            m = 0
+            # 小题号
+            n = 1
+            for i, question in enumerate(questionSelected):
+                # 这是stem
+                if question['id'] > 0:
+                    data_to_paper += str(n) + '、 ' + question['stem'] + '\n\n'
+                    n += 1
+                elif question['id'] < 0:
+                    data_to_paper += CHINESE_NUMBER[m] + "、 " + question['stem'] + '\n\n'
+                    m += 1
+                else:
+                    data_to_paper += question['stem'] + '\n\n'
 
-        response = {'ok': True}
-        data_to_paper = re.sub('!\[.*\](?=\(.*\))', "${I'm_a_photo}", data_to_paper)
-        md_to_docx(data_to_paper)
+                # 这是options
+                data_to_paper += question['options'].replace('\n', '\n\n ') + '\n\n'
+                if has_answer and question['id'] > 0:
+                    data_to_paper += '答案： ' + question['answer'] + '\n\n'
+            response = {'ok': True}
+            if not os.path.exists(STATIC_PATH + r"docx/" + randomKey):
+                os.mkdir(STATIC_PATH + r"docx/" + randomKey)
+            if has_answer:
+                md_to_docx(data_to_paper, randomKey + 'answer')
+            else:
+                md_to_docx(data_to_paper, randomKey)
+            make_zip(STATIC_PATH + r"docx/" + randomKey + '/',
+                     STATIC_PATH + r"zip/" + randomKey + '.zip')
         return JsonResponse(response)
     return JsonResponse({'ok': False, 'errmsg': 'Only accept POST request'})
 
 
 # Tools
-def md_to_docx(md_txt):
+def md_to_docx(md_txt, filename):
     md_path = r"TestPaperManager/use_pandoc/temp.md"
-    docx_path = r"TestPaperManager\use_pandoc\temp.docx"
-    img_path = r"TestPaperManager\use_pandoc\temp.jpg"
+    docx_path = r"TestPaperManager/static/TestPaperManager/docx/" + filename[:8] + '/' + filename + ".docx"
 
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_txt)
-    pypandoc.convert_file(md_path, 'docx',
-                          outputfile=docx_path, extra_args=['--pdf-engine=xelatex'])
-    # 然后再把word读进去进行一下格式上的修饰
-    document = Document(docx_path)
-    for paragraph in document.paragraphs:
-        text = paragraph.text  # 打印各段落内容文本
-        if re.match('^\${4} .*', text):
-            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-            paragraph.runs[0].bold = True
-        elif re.match('^\${3} .*', text):
-            paragraph.paragraph_format.first_line_indent = Inches(0.3)
-        elif re.match('^\${2} .*', text):
-            paragraph.paragraph_format.left_indent = Inches(0.3)
-        #  删除段落标记！！！！！
-        result_url = re.findall("(?<=[$]\{I.m_a_photo\}\().*(?=\))", paragraph.text)
-        for url in result_url:
-            img = requests.get(url)
-            with open(img_path, 'wb') as f:
-                f.write(img.content)
-            document.add_picture(img_path, width=Inches(1.25))
-        paragraph.text = re.sub('(^\${4}|^\${3}|^\${2}|[$]\{I.m_a_photo\}\(.*?\))', '', paragraph.text)
-    document.save(docx_path)
+    pypandoc.convert_file(md_path, 'docx', outputfile=docx_path)
 
 
+def make_zip(source_dir, output_filename):
+    zipf = zipfile.ZipFile(output_filename, 'w')
+    pre_len = len(os.path.dirname(source_dir))
+    for parent, dirnames, filenames in os.walk(source_dir):
+        for filename in filenames:
+            pathfile = os.path.join(parent, filename)
+            arcname = pathfile[pre_len:].strip(os.path.sep)  # 相对路径
+            zipf.write(pathfile, arcname)
+    zipf.close()
+
+
+@csrf_exempt
 def auto_export(request):
-    pass
+    request_data = json.loads(request.body.decode())
+    questionInfo = request_data.get('questionInfo', False)
+    paperInfo = request_data.get('paperInfo', False)
+    randomKey = request_data.get('randomKey', False)
+    # randomKey = 'ASDS23F3'
+    print(request_data)
+    response = {'ok': True}
+    for has_answer in [0, 1]:
+        # 大题号
+        m = 0
+        # 小题号
+        n = 1
+        # 导出的markdown文本
+        data_to_paper = "**" + paperInfo['paper_name'] + '**\n\n'
+        for i in questionInfo:
+            qs = Question.objects.filter(difficulty_id=i['difficulty'], type_id=i['type'])
+            print(i, qs.count())
+            if qs.count() < int(i['num']):
+                response['ok'] = False
+                response['errmsg'] = '题库里面的题目不够你导出哦，难度为%s的%s只有%d道哦！' % (
+                    QuestionDifficulty.objects.get(id=i['difficulty']).name,
+                    QuestionTypes.objects.get(id=i['type']),
+                    qs.count()
+                )
+                return JsonResponse(response)
+            else:
+                response['ok'] = True
+                # 加入题型标签
+                data_to_paper += CHINESE_NUMBER[m] + "、 " + QuestionTypes.objects.get(id=i['type']).name + '\n\n'
+                m += 1
+                # 加入题目
+                for j in numpy.random.choice(qs, size=i['num'], replace=False):
+                    data_to_paper += str(n) + '、 ' + j.stem + '\n\n'
+                    data_to_paper += j.options.replace('\n', '\n\n') + '\n\n'
+                    n += 1
+                    if has_answer:
+                        data_to_paper += '答案： ' + j.answer + '\n\n'
+        if not os.path.exists(STATIC_PATH + r"docx/" + randomKey):
+            os.mkdir(STATIC_PATH + r"docx/" + randomKey)
+        if has_answer:
+            md_to_docx(data_to_paper, randomKey + 'answer')
+        else:
+            md_to_docx(data_to_paper, randomKey)
+        make_zip(STATIC_PATH + r"docx/" + randomKey + '/',
+                 STATIC_PATH + r"zip/" + randomKey + '.zip')
+    return JsonResponse(response)

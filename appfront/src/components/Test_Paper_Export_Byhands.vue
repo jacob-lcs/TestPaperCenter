@@ -54,6 +54,7 @@
                 filterable
                 style="min-width: 200px;margin:0 5px;width: auto;"
                 placeholder="请输入以搜索学校名称"
+                @on-change="school_changed"
               >
                 <Option
                   v-for="school in school_list"
@@ -121,6 +122,25 @@
                 @click="export_paper"
                 :loading="export_button_loading"
               >导出试卷</Button>
+              <Modal v-model="showDownloadPage" class-name="vertical-center-modal">
+                <p slot="header" style="font-size:20px">请选择导出方式</p>
+
+                <div style="text-align:center;">
+                  <Button type="primary" class="download-button" @click="download(1)">
+                    仅导出试题
+                    <br>不包含答案
+                  </Button>
+                  <Button type="primary" class="download-button" @click="download(2)">
+                    导出试题
+                    <br>包含答案
+                  </Button>
+                  <Button type="primary" class="download-button" @click="download(3)">
+                    导出试题压缩包
+                    <br>含答案和不含答案版本
+                  </Button>
+                </div>
+                <div slot="footer"></div>
+              </Modal>
             </div>
             <h2 v-if="questionSelected.length==0" style="padding:20px">还没有题目哦</h2>
             <draggable v-else v-model="questionSelected" group="question">
@@ -170,7 +190,7 @@
                             <Input v-model="questionDetail.name"></Input>
                           </FormItem>
                           <FormItem label="题型说明">
-                            <Input v-model="questionDetail.detail"></Input>
+                            <Input v-model="questionDetail.detail" type="textarea" :autosize="true"></Input>
                           </FormItem>
                         </Form>
                       </div>
@@ -180,7 +200,7 @@
                     </Modal>
 
                     <br>
-                    <span v-if="element.id>=0" style="color:red">答案：{{element.answer}}</span>
+                    <span v-if="element.id>0" style="color:red">答案：{{element.answer}}</span>
                   </p>
                 </Card>
               </transition-group>
@@ -200,77 +220,25 @@ export default {
   name: "Test_Paper_Export_Mode",
   data() {
     return {
+      showDownloadPage: false,
       showQuestionDetail: false,
       question_now_id: 0,
       questionDetail: {
         name: "",
         detail: ""
       },
+      randomKey: "",
       questionSearched: [
         {
           id: 0,
           stem: "xswl",
           options:
             "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 1,
-          stem: "cxk",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 3,
-          stem: "789",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 4,
-          stem: "nmsl",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 5,
-          stem: "多喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 6,
-          stem: "少喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 7,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 8,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 9,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 10,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
         }
       ],
       questionSelected: [
         {
-          id: -2,
+          id: 0,
           stem: "title",
           options: "试卷说明"
         }
@@ -307,7 +275,8 @@ export default {
         { name: "复旦附中", id: 2 },
         { name: "上大附中", id: 3 }
       ], ///已经有的学校
-      export_button_loading: false
+      export_button_loading: false,
+      type_id: -1
     };
   },
   mounted() {
@@ -316,8 +285,8 @@ export default {
     console.log("params:", this.$route.params);
     this.paperInfo = {
       paper_name: "兰生复旦7年级综合卷",
-      subject: 1,
-      grade: 1,
+      subject: 2,
+      grade: 6,
       ok: true
     };
     console.log("this.$route.params", this.$route.params);
@@ -329,7 +298,8 @@ export default {
       url: that.$site + "api/query_knowledgepoint",
       dataType: "json",
       data: {
-        subject: "物理"
+        subject: this.paperInfo.subject,
+        id: true
       },
       success: function(data) {
         // console.log(data);
@@ -367,7 +337,7 @@ export default {
     // 查询题型
     this.$axios
       .get(this.$site + "api/query_types", {
-        params: { subject: this.paperInfo.subject }
+        params: { subject: this.paperInfo.subject, id: true }
       })
       .then(res => {
         console.log("query_types", res.data);
@@ -416,9 +386,90 @@ export default {
         });
       });
     this.flush_questions(true);
+    this.randomKey = this.randomNum();
   },
   computed: {},
   methods: {
+    randomNum() {
+      var a = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ];
+      var i = 0;
+      var res = "";
+      while (i < 8) {
+        res += a[parseInt(Math.random() * 35, 10)];
+        i += 1;
+      }
+      return res;
+    },
+
+    download(n) {
+      switch (n) {
+        case 1:
+          window.open(
+            this.$site +
+              "static/TestPaperManager/docx/" +
+              this.randomKey +
+              "/" +
+              this.randomKey +
+              ".docx"
+          );
+          break;
+        case 2:
+          window.open(
+            this.$site +
+              "static/TestPaperManager/docx/" +
+              this.randomKey +
+              "/" +
+              this.randomKey +
+              "answer.docx"
+          );
+          break;
+        case 3:
+          window.open(
+            this.$site +
+              "static/TestPaperManager/zip/" +
+              this.randomKey +
+              ".zip"
+          );
+          break;
+      }
+    },
     flush_detail() {
       var question_now = this.questionSelected.find(q => {
         return this.question_now_id === q.id;
@@ -432,50 +483,33 @@ export default {
     },
     add_detail() {
       this.questionSelected.push({
-        id: -1,
+        id: this.type_id,
         stem: "选择题",
         options: "题型说明"
       });
+      this.type_id -= 1;
     },
     edit_content(id) {
       this.question_now_id = id;
+      var question_now = this.questionSelected.find(q => {
+        return this.question_now_id === q.id;
+      });
+      this.questionDetail.name = question_now.stem;
+      this.questionDetail.detail = question_now.options;
       this.showQuestionDetail = true;
       // todo 修改content
     },
     test() {
       let that = this;
       console.log("恭喜你进入测试程序");
-      this.$axios
-        .post(that.$site + "api/search_question", {
-          paperInfo: this.paperInfo,
-          filters: this.questionFilters
-        })
-        .then(res => {
-          console.log(res);
-          var ok = res.data.ok;
-          if (ok) {
-            this.$Notice.success({
-              title: "查找成功",
-              desc: "不写点什么感觉过意不去呢"
-            });
-          } else {
-            this.$Notice.error({
-              title: "查找失败",
-              desc: "不写点什么感觉过意不去呢"
-            });
-          }
-        })
-        .catch(err => {
-          this.$Notice.error({
-            title: "查找失败",
-            desc: err
-          });
-        });
     },
     export_paper() {
       this.export_button_loading = true;
       this.$axios
-        .post(this.$site + "api/paper_export", this.questionSelected)
+        .post(this.$site + "api/paper_export", {
+          questionSelected: this.questionSelected,
+          randomKey: this.randomKey
+        })
         .then(res => {
           console.log(res);
           if (res.data.ok) {
@@ -483,6 +517,7 @@ export default {
               title: "导出成功"
             });
             this.export_button_loading = false;
+            this.showDownloadPage = true;
           } else {
             this.$Notice.error({
               title: "导出失败"
@@ -560,6 +595,10 @@ export default {
       this.questionFilters[i].items[j].selected = !this.questionFilters[i]
         .items[j].selected;
     },
+    school_changed() {
+      console.log("学校变了呢");
+      this.flush_questions();
+    },
     // 知识点级联选择变化触发的事件
     knowledge_point_change(value, selectedData) {
       // console.log("触发级联选择器change事件");
@@ -572,6 +611,7 @@ export default {
     knowledgepoint_close(event, name) {
       const index = this.knowledgepoint_list.indexOf(name);
       this.knowledgepoint_list.splice(index, 1);
+      this.flush_questions();
     }
   },
   watch: {
@@ -630,7 +670,7 @@ export default {
   float: right;
 
   font-size: 20px;
-  margin-top: 8px;
+  margin-top: 2px;
 }
 
 .remove-button {
@@ -674,7 +714,8 @@ body,
   min-width: 40px;
 }
 .question-fliter-item {
-  margin: 0 5px;
+  margin: 2px 5px;
+  float: left;
 }
 .question-fliter {
   display: flex;
@@ -708,5 +749,23 @@ body,
 }
 .v-note-wrapper {
   z-index: 20 !important;
+}
+.back-ground {
+  background: #c9ccd3;
+  background-image: linear-gradient(
+    -180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(0, 0, 0, 0.5) 100%
+  );
+  background-blend-mode: lighten;
+}
+
+.vertical-center-modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ivu-modal {
+  position: unset;
 }
 </style>
