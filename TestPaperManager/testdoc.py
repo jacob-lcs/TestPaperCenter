@@ -47,12 +47,9 @@ def make_new_file():
 
 
 def read_a_file():
-    import zipfile
-    f = zipfile.ZipFile('demo.docx', 'r')
-    # 解压文件
-    for i in f.namelist():
-        print(i)
-        print(f.extract(i))
+    document = Document(r'D:\SoulCoder\GitHub\TestPaperCenter\TestPaperManager\use_pandoc\temp1.docx')
+    for i in document.paragraphs:
+        print(i.text)
 
 
 if __name__ == '__main__':

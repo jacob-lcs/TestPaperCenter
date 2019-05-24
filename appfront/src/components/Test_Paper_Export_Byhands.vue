@@ -20,7 +20,8 @@
                   v-for="(item, j) in filter.items"
                   :ghost="item.selected"
                   :key="j"
-                >{{item.name}}</Button>
+                >{{item.name}}
+                </Button>
               </div>
             </div>
             <!-- 知识点筛选器 -->
@@ -34,7 +35,8 @@
                   closable
                   @on-close="knowledgepoint_close"
                   style="margin: 3px 5px"
-                >{{ item }}</Tag>
+                >{{ item }}
+                </Tag>
               </div>
               <Cascader
                 :data="knowledge"
@@ -59,10 +61,12 @@
                   v-for="school in school_list"
                   :value="school.id"
                   :key="school.id"
-                >{{school.name}}</Option>
+                >{{school.name}}
+                </Option>
               </Select>
             </div>
             <h2 v-if="questionSearched.length==0">没有查到结果</h2>
+            <!-- 左侧拖拽列表 -->
             <draggable v-else v-model="questionSearched" group="question">
               <transition-group>
                 <Collapse
@@ -71,21 +75,43 @@
                   class="question-card"
                 >
                   <Panel>
-                    {{element.stem}}
+                    <div class="question-header" v-html="compiledMarkdown(element.stem,true)"></div>
                     <Icon
                       @click="add(element.id)"
                       style="cursor:pointer"
                       class="add-button"
                       type="md-add"
                     />
-                    <p slot="content" class="question-content">{{element.options}}</p>
+                    <!-- <p slot="content" class="question-content">{{element.options}}</p> -->
+
+                    <div
+                      v-if="element.type===2|element.type===3|element.type===7|element.type===8"
+                      slot="content"
+                      class="question-content"
+                      v-html="compiledMarkdown(element.options)"
+                    ></div>
+                    <div slot="content" v-else>
+                      <mavon-editor
+                        v-model="element.stem"
+                        :subfield="false"
+                        :defaultOpen="'preview'"
+                        :toolbarsFlag="false"
+                        :boxShadow="false"
+                      />
+                    </div>
+                    <!-- <div
+                      v-else
+                      slot="content"
+                      class="question-content"
+                      v-html="compiledMarkdown(element.stem)"
+                    ></div>-->
                   </Panel>
                 </Collapse>
               </transition-group>
             </draggable>
           </Scroll>
         </div>
-        <!-- 右侧栏目 -->
+        <!-- 右侧栏目-==================================================================== -->
         <div slot="right" class="demo-split-pane">
           <!-- 可拖动列表-组卷 -->
           <Scroll style="height:100%">
@@ -97,14 +123,15 @@
                 style="margin-right:10px"
                 @click="export_paper"
                 :loading="export_button_loading"
-              >导出试卷</Button>
+              >导出试卷
+              </Button>
             </div>
             <h2 v-if="questionSelected.length==0" style="padding:20px">还没有题目哦</h2>
             <draggable v-else v-model="questionSelected" group="question">
               <transition-group>
                 <Card v-for="element in questionSelected" :key="element.id" class="question-card">
-                  <p slot="title" class="question-title">
-                    {{element.stem}}
+                  <div slot="title" class="question-title">
+                    <div class="question-detail" v-html="compiledMarkdown(element.stem,true)"></div>
                     <Icon
                       v-if="element.id>0"
                       @click="remove(element.id)"
@@ -112,17 +139,53 @@
                       class="remove-button"
                       type="md-close"
                     />
-                  </p>
+                  </div>
                   <p class="question-content">
-                    {{element.options}}
+                    <mavon-editor
+                      v-if="element.id>0"
+                      v-model="element.stem"
+                      :subfield="false"
+                      :defaultOpen="'preview'"
+                      :toolbarsFlag="false"
+                      :boxShadow="false"
+                    />
+                    <mavon-editor
+                      v-model="element.options"
+                      :subfield="false"
+                      :defaultOpen="'preview'"
+                      :toolbarsFlag="false"
+                      :boxShadow="false"
+                    />
                     <Button
                       v-if="element.id<=0"
                       type="primary"
                       style="float:right;vertical-align: middle;"
                       @click="edit_content(element.id)"
-                    >修改</Button>
-                    <br>
-                    <span v-if="element.id>=0" style="color:red">答案：{{element.answer}}</span>
+                    >修改
+                    </Button>
+
+                    <Modal v-model="showQuestionDetail" width="360" :on-ok="flush_detail">
+                  <p slot="header" style="color:#f60;text-align:center">
+                    <!-- <Icon type="ios-information-circle"></Icon> -->
+                    <span>请输入题型信息</span>
+                  </p>
+                  <div style="text-align:center">
+                    <Form :model="questionDetail" label-position="left" :label-width="100">
+                      <FormItem label="题型名">
+                        <Input v-model="questionDetail.name"></Input>
+                      </FormItem>
+                      <FormItem label="题型说明">
+                        <Input v-model="questionDetail.detail"></Input>
+                      </FormItem>
+                    </Form>
+                  </div>
+                  <div slot="footer">
+                    <Button type="error" size="large" long @click="flush_detail">确定</Button>
+                  </div>
+                  </Modal>
+
+                  <br>
+                  <span v-if="element.id>=0" style="color:red">答案：{{element.answer}}</span>
                   </p>
                 </Card>
               </transition-group>
@@ -135,472 +198,541 @@
 </template>
 
 <script>
-import draggable from "vuedraggable";
-import marked from "marked";
-export default {
-  name: "Test_Paper_Export_Mode",
-  data() {
-    return {
-      questionSearched: [
-        {
-          id: 0,
-          stem: "xswl",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+  import draggable from "vuedraggable";
+  import marked from "marked";
+  import {mavonEditor} from "mavon-editor";
+
+  export default {
+    name: "Test_Paper_Export_Mode",
+    data() {
+      return {
+        showQuestionDetail: false,
+        question_now_id: 0,
+        questionDetail: {
+          name: "",
+          detail: ""
         },
-        {
-          id: 1,
-          stem: "cxk",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 3,
-          stem: "789",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 4,
-          stem: "nmsl",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 5,
-          stem: "多喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 6,
-          stem: "少喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 7,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 8,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 9,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        },
-        {
-          id: 10,
-          stem: "不喝热水",
-          options:
-            "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
-        }
-      ],
-      questionSelected: [
-        {
-          id: -2,
-          stem: "title",
-          options: "试卷说明"
-        }
-      ],
-      split: 0.5,
-      // 筛选题库
-      questionFilters: [
-        {
-          name: "难度",
-          items: [
-            { name: "困难", selected: true },
-            { name: "中等", selected: true },
-            { name: "简单", selected: true },
-            { name: "智障", selected: true },
-            { name: "沙雕", selected: true }
-          ]
-        },
-        {
-          name: "题型",
-          items: [
-            { name: "填空", selected: true },
-            { name: "选择", selected: true },
-            { name: "判断", selected: true },
-            { name: "bulabula", selected: true }
-          ]
-        }
-      ],
-      knowledgepoint_list: [], // 已选择的知识点列表
-      knowledge: [], // 全部的知识点列表
-      paperInfo: { ok: false },
-      school_selected: [], //已经选择的学校
-      school_list: [
-        { name: "上海中学", id: 1 },
-        { name: "复旦附中", id: 2 },
-        { name: "上大附中", id: 3 }
-      ], ///已经有的学校
-      export_button_loading: false
-    };
-  },
-  mounted() {
-    let that = this;
-    //  获取知识点列表
-    console.log("params:", this.$route.params);
-    this.paperInfo = {
-      paper_name: "兰生复旦7年级综合卷",
-      subject: 1,
-      grade: 1,
-      ok: true
-    };
-    console.log("this.$route.params", this.$route.params);
-    if (Object.keys(this.$route.params).length)
-      this.paperInfo = this.$route.params;
-    this.questionSelected[0].stem = this.paperInfo.paper_name;
-    this.paperInfo.ok = true;
-    $.ajax({
-      url: that.$site + "api/query_knowledgepoint",
-      dataType: "json",
-      data: {
-        subject: "物理"
-      },
-      success: function(data) {
-        // console.log(data);
-        that.knowledge = [];
-        for (var i = 0; i < data.length; i++) {
-          that.knowledge.push(data[i]);
-        }
+        questionSearched: [
+          {
+            id: 0,
+            stem: "xswl",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 1,
+            stem: "cxk",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 3,
+            stem: "789",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 4,
+            stem: "nmsl",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 5,
+            stem: "多喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 6,
+            stem: "少喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 7,
+            stem: "不喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 8,
+            stem: "不喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 9,
+            stem: "不喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          },
+          {
+            id: 10,
+            stem: "不喝热水",
+            options:
+              "我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容我是题目的内容"
+          }
+        ],
+        questionSelected: [
+          {
+            id: -2,
+            stem: "title",
+            options: "试卷说明"
+          }
+        ],
+        split: 0.5,
+        // 筛选题库
+        questionFilters: [
+          {
+            name: "难度",
+            items: [
+              {name: "困难", selected: true},
+              {name: "中等", selected: true},
+              {name: "简单", selected: true},
+              {name: "智障", selected: true},
+              {name: "沙雕", selected: true}
+            ]
+          },
+          {
+            name: "题型",
+            items: [
+              {name: "填空", selected: true},
+              {name: "选择", selected: true},
+              {name: "判断", selected: true},
+              {name: "bulabula", selected: true}
+            ]
+          }
+        ],
+        knowledgepoint_list: [], // 已选择的知识点列表
+        knowledge: [], // 全部的知识点列表
+        paperInfo: {ok: false},
+        school_selected: [], //已经选择的学校
+        school_list: [
+          {name: "上海中学", id: 1},
+          {name: "复旦附中", id: 2},
+          {name: "上大附中", id: 3}
+        ], ///已经有的学校
+        export_button_loading: false
+      };
+    },
+    mounted() {
+      let that = this;
+
+      // 路径保护
+      if (sessionStorage.getItem('per_name') === null || sessionStorage.getItem('identity') === 'keyboarder') {
+        this.$router.push("/")
+      } else {
+        console.log(sessionStorage.getItem('per_name'))
       }
-    });
-    // 查询难度信息
-    this.$axios
-      .get(this.$site + "api/query_difficulty")
-      .then(res => {
-        // console.log("query_difficulty", res.data);
-        var difficulties = [];
-        for (const item in res.data) {
-          if (res.data.hasOwnProperty(item)) {
-            const element = res.data[item];
-            difficulties.push({
-              id: element.id,
-              name: element.name,
-              selected: true
-            });
-          }
-        }
-        this.questionFilters[0]["items"] = difficulties;
-      })
-      .catch(err => {
-        this.$Notice.error({
-          title: "查询难度信息失败",
-          desc: err
-        });
-      });
 
-    // 查询题型
-    this.$axios
-      .get(this.$site + "api/query_types")
-      .then(res => {
-        // console.log("query_types", res.data);
-        var difficulties = [];
-        for (const item in res.data) {
-          if (res.data.hasOwnProperty(item)) {
-            const element = res.data[item];
-            difficulties.push({
-              id: element.id,
-              name: element.name,
-              selected: true
-            });
+      //  获取知识点列表
+      console.log("params:", this.$route.params);
+      this.paperInfo = {
+        paper_name: "兰生复旦7年级综合卷",
+        subject: 1,
+        grade: 1,
+        ok: true
+      };
+      console.log("this.$route.params", this.$route.params);
+      if (Object.keys(this.$route.params).length)
+        this.paperInfo = this.$route.params;
+      this.questionSelected[0].stem = this.paperInfo.paper_name;
+      this.paperInfo.ok = true;
+      $.ajax({
+        url: that.$site + "api/query_knowledgepoint",
+        dataType: "json",
+        data: {
+          subject: "物理"
+        },
+        success: function (data) {
+          // console.log(data);
+          that.knowledge = [];
+          for (var i = 0; i < data.length; i++) {
+            that.knowledge.push(data[i]);
           }
         }
-        this.questionFilters[1]["items"] = difficulties;
-      })
-      .catch(err => {
-        this.$Notice.error({
-          title: "查询题型失败",
-          desc: err
-        });
       });
+      // 查询难度信息
+      this.$axios
+        .get(this.$site + "api/query_difficulty")
+        .then(res => {
+          // console.log("query_difficulty", res.data);
+          var difficulties = [];
+          for (const item in res.data) {
+            if (res.data.hasOwnProperty(item)) {
+              const element = res.data[item];
+              difficulties.push({
+                id: element.id,
+                name: element.name,
+                selected: true
+              });
+            }
+          }
+          this.questionFilters[0]["items"] = difficulties;
+        })
+        .catch(err => {
+          this.$Notice.error({
+            title: "查询难度信息失败",
+            desc: err
+          });
+        });
 
-    // 查询学校信息
-    this.$axios
-      .get(this.$site + "api/query_school")
-      .then(res => {
-        console.log("query_school", res.data);
-        var schools = [];
-        for (const item in res.data) {
-          if (res.data.hasOwnProperty(item)) {
-            const element = res.data[item];
-            schools.push({
-              id: element.id,
-              name: element.name,
-              selected: true
-            });
+      // 查询题型
+      this.$axios
+        .get(this.$site + "api/query_types", {
+          params: {subject: this.paperInfo.subject}
+        })
+        .then(res => {
+          console.log("query_types", res.data);
+          var difficulties = [];
+          for (const item in res.data) {
+            if (res.data.hasOwnProperty(item)) {
+              const element = res.data[item];
+              difficulties.push({
+                id: element.id,
+                name: element.name,
+                selected: true
+              });
+            }
           }
-        }
-        this.school_list = schools;
-      })
-      .catch(err => {
-        this.$Notice.error({
-          title: "查询学校失败",
-          desc: err
+          this.questionFilters[1]["items"] = difficulties;
+        })
+        .catch(err => {
+          this.$Notice.error({
+            title: "查询题型失败",
+            desc: err
+          });
         });
-      });
-    this.flush_questions(true);
-  },
-  computed: {},
-  methods: {
-    add_detail(){
-      this.questionSelected.push(
-        {
+
+      // 查询学校信息
+      this.$axios
+        .get(this.$site + "api/query_school")
+        .then(res => {
+          console.log("query_school", res.data);
+          var schools = [];
+          for (const item in res.data) {
+            if (res.data.hasOwnProperty(item)) {
+              const element = res.data[item];
+              schools.push({
+                id: element.id,
+                name: element.name,
+                selected: true
+              });
+            }
+          }
+          this.school_list = schools;
+        })
+        .catch(err => {
+          this.$Notice.error({
+            title: "查询学校失败",
+            desc: err
+          });
+        });
+      this.flush_questions(true);
+    },
+    computed: {},
+    methods: {
+      flush_detail() {
+        var question_now = this.questionSelected.find(q => {
+          return this.question_now_id === q.id;
+        });
+        question_now.stem = this.questionDetail.name;
+        question_now.options = this.questionDetail.detail;
+        this.showQuestionDetail = false;
+      },
+      get_first(context) {
+        return context;
+      },
+      add_detail() {
+        this.questionSelected.push({
           id: -1,
           stem: "选择题",
           options: "题型说明"
         });
-    },
-    edit_content(id) {
-      var question_now = this.questionSelected.find(q => {
-        return q.id === id;
-      });
-      // todo 修改content
-    },
-    test() {
-      let that = this;
-      console.log("恭喜你进入测试程序");
-      this.$axios
-        .post(that.$site + "api/search_question", {
+      },
+      edit_content(id) {
+        this.question_now_id = id;
+        this.showQuestionDetail = true;
+        // todo 修改content
+      },
+      test() {
+        let that = this;
+        console.log("恭喜你进入测试程序");
+        this.$axios
+          .post(that.$site + "api/search_question", {
+            paperInfo: this.paperInfo,
+            filters: this.questionFilters
+          })
+          .then(res => {
+            console.log(res);
+            var ok = res.data.ok;
+            if (ok) {
+              this.$Notice.success({
+                title: "查找成功",
+                desc: "不写点什么感觉过意不去呢"
+              });
+            } else {
+              this.$Notice.error({
+                title: "查找失败",
+                desc: "不写点什么感觉过意不去呢"
+              });
+            }
+          })
+          .catch(err => {
+            this.$Notice.error({
+              title: "查找失败",
+              desc: err
+            });
+          });
+      },
+      export_paper() {
+        this.export_button_loading = true;
+        this.$axios
+          .post(this.$site + "api/paper_export", this.questionSelected)
+          .then(res => {
+            console.log(res);
+            if (res.data.ok) {
+              this.$Notice.success({
+                title: "导出成功"
+              });
+              this.export_button_loading = false;
+            } else {
+              this.$Notice.error({
+                title: "导出失败"
+              });
+              this.export_button_loading = false;
+            }
+          })
+          .catch(err => {
+            console.log(err);
+            this.$Notice.error({
+              title: "导出失败",
+              desc: err
+            });
+            this.export_button_loading = false;
+          });
+      },
+      flush_questions(isall = false) {
+        console.log("更新问题");
+        var datas = {
           paperInfo: this.paperInfo,
-          filters: this.questionFilters
-        })
-        .then(res => {
-          console.log(res);
-          var ok = res.data.ok;
-          if (ok) {
-            this.$Notice.success({
-              title: "查找成功",
-              desc: "不写点什么感觉过意不去呢"
-            });
-          } else {
+          filters: this.questionFilters,
+          knowledge_point: this.knowledgepoint_list,
+          school_selected: this.school_selected
+        };
+        if (isall) datas = {isall: true};
+        this.$axios
+          .post(this.$site + "api/search_question", datas)
+          .then(res => {
+            var ok = res.data.ok;
+            if (ok) {
+              this.questionSearched = res.data.data;
+              // for (let i = 0; i < res.data.data.length; i++) {
+              //   const e = res.data.data[i];
+              //   this.questionSearched
+              // }
+              this.$Notice.success({
+                title: "查找成功",
+                desc: "不写点什么感觉过意不去呢"
+              });
+              console.log(res.data);
+            } else {
+              this.$Notice.error({
+                title: "查找失败",
+                desc: "不写点什么感觉过意不去呢"
+              });
+            }
+          })
+          .catch(err => {
             this.$Notice.error({
               title: "查找失败",
-              desc: "不写点什么感觉过意不去呢"
+              desc: err
             });
-          }
-        })
-        .catch(err => {
-          this.$Notice.error({
-            title: "查找失败",
-            desc: err
           });
-        });
-    },
-    export_paper() {
-      this.export_button_loading = true;
-      this.$axios
-        .post(this.$site + "api/paper_export", this.questionSelected)
-        .then(res => {
-          console.log(res);
-          if (res.data.ok) {
-            this.$Notice.success({
-              title: "导出成功"
-            });
-            this.export_button_loading = false;
-          } else {
-            this.$Notice.error({
-              title: "导出失败"
-            });
-            this.export_button_loading = false;
+      },
+      // 拖拽列表的添加和删除事件
+      add(id) {
+        this.questionSearched.forEach((item, index, arr) => {
+          if (item.id === id) {
+            this.questionSelected.push(item);
+            arr.splice(index, 1);
           }
-        })
-        .catch(err => {
-          console.log(err);
-          this.$Notice.error({
-            title: "导出失败",
-            desc: err
-          });
-          this.export_button_loading = false;
         });
-    },
-    flush_questions(isall = false) {
-      console.log("更新问题");
-      var datas = {
-        paperInfo: this.paperInfo,
-        filters: this.questionFilters,
-        knowledge_point: this.knowledgepoint_list,
-        school_selected: this.school_selected
-      };
-      if (isall) datas = { isall: true };
-      this.$axios
-        .post(this.$site + "api/search_question", datas)
-        .then(res => {
-          var ok = res.data.ok;
-          if (ok) {
-            this.questionSearched = res.data.data;
-            // for (let i = 0; i < res.data.data.length; i++) {
-            //   const e = res.data.data[i];
-            //   this.questionSearched
-            // }
-            this.$Notice.success({
-              title: "查找成功",
-              desc: "不写点什么感觉过意不去呢"
-            });
-            console.log(res.data);
-          } else {
-            this.$Notice.error({
-              title: "查找失败",
-              desc: "不写点什么感觉过意不去呢"
-            });
+      },
+      remove(id) {
+        this.questionSelected.forEach((item, index, arr) => {
+          if (item.id === id) {
+            this.questionSearched.push(item);
+            arr.splice(index, 1);
           }
-        })
-        .catch(err => {
-          this.$Notice.error({
-            title: "查找失败",
-            desc: err
-          });
         });
-    },
-    // 拖拽列表的添加和删除事件
-    add(id) {
-      this.questionSearched.forEach((item, index, arr) => {
-        if (item.id === id) {
-          this.questionSelected.push(item);
-          arr.splice(index, 1);
+      },
+      question_fliter(e, i, j) {
+        // console.log(e, i, j);
+        this.flush_questions();
+        this.questionFilters[i].items[j].selected = !this.questionFilters[i]
+          .items[j].selected;
+      },
+      // 知识点级联选择变化触发的事件
+      knowledge_point_change(value, selectedData) {
+        // console.log("触发级联选择器change事件");
+        this.flush_questions();
+        if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
+          this.knowledgepoint_list.push(value[value.length - 1]);
         }
-      });
-    },
-    remove(id) {
-      this.questionSelected.forEach((item, index, arr) => {
-        if (item.id === id) {
-          this.questionSearched.push(item);
-          arr.splice(index, 1);
-        }
-      });
-    },
-    question_fliter(e, i, j) {
-      // console.log(e, i, j);
-      this.flush_questions();
-      this.questionFilters[i].items[j].selected = !this.questionFilters[i]
-        .items[j].selected;
-    },
-    // 知识点级联选择变化触发的事件
-    knowledge_point_change(value, selectedData) {
-      // console.log("触发级联选择器change事件");
-      this.flush_questions();
-      if (this.knowledgepoint_list.indexOf(value[value.length - 1]) === -1) {
-        this.knowledgepoint_list.push(value[value.length - 1]);
+      },
+      // 关闭知识点标签触发的事件
+      knowledgepoint_close(event, name) {
+        const index = this.knowledgepoint_list.indexOf(name);
+        this.knowledgepoint_list.splice(index, 1);
       }
     },
-    // 关闭知识点标签触发的事件
-    knowledgepoint_close(event, name) {
-      const index = this.knowledgepoint_list.indexOf(name);
-      this.knowledgepoint_list.splice(index, 1);
+    watch: {
+      questionFilters() {
+        console.log("questionFilters has changed", this.questionFilters);
+      }
+    },
+    computed: {
+      compiledMarkdown() {
+        return (context, first = false) => {
+          if (first) {
+            if (context.length > 20) {
+              return marked(context.substr(0, 20) + "...", {sanitize: true});
+            }
+          }
+          return marked(context, {sanitize: true});
+        };
+      }
+    },
+    components: {
+      draggable
     }
-  },
-  watch: {
-    questionFilters() {
-      console.log("questionFilters has changed", this.questionFilters);
-    }
-  },
-  computed: {
-    compiledMarkdown() {
-      //this.articleDetail.context数据
-      return marked(this.articleDetail.context, { sanitize: true });
-    }
-  },
-  components: {
-    draggable
-  }
-};
+  };
 </script>
 
 <style scope>
-.demo-split {
-  /* height: 800px; */
-  border: 1px solid #dcdee2;
-}
+  .demo-split {
+    /* height: 800px; */
+    border: 1px solid #dcdee2;
+  }
 
-.demo-split-pane {
-  padding: 10px;
-}
+  .demo-split-pane {
+    padding: 10px;
+  }
 
-.question-card {
-  margin: 10px;
-}
+  .question-card {
+    margin: 10px;
+  }
 
-.question-title {
-  text-align: left;
-}
+  .question-title {
+    text-align: left;
+    display: flex;
+    width: 100%;
+  }
 
-.question-content {
-  text-align: left;
-  display: flow-root;
-}
+  .question-content {
+    text-align: left;
+    display: flow-root;
+  }
 
-.ivu-card-head {
-  display: flex;
-}
+  .ivu-card-head {
+    display: flex;
+  }
 
-.add-button {
-  float: right;
+  .add-button {
+    float: right;
 
-  font-size: 20px;
-  margin-top: 8px;
-}
+    font-size: 20px;
+    margin-top: 8px;
+  }
 
-.remove-button {
-  line-height: 20px;
-  float: right;
-}
+  .remove-button {
+    line-height: 20px;
+    float: right;
+  }
 
-.ivu-collapse-item {
-  text-align: left;
-}
+  .ivu-collapse-item {
+    text-align: left;
+  }
 
-.ivu-collapse-header {
-  font-size: 17px;
-}
+  .question-content {
+    font-size: 14px;
+  }
 
-.question-content {
-  font-size: 14px;
-}
+  .ivu-collapse-content-box {
+    font-size: 12px;
+  }
 
-.ivu-collapse-content-box {
-  font-size: 12px;
-}
+  .demo-split-pane {
+    height: 100%;
+  }
 
-.demo-split-pane {
-  height: 100%;
-}
+  .ivu-scroll-container {
+    height: 98% !important;
+  }
 
-.ivu-scroll-container {
-  height: 98% !important;
-}
+  #app,
+  html,
+  body,
+  .main,
+  .demo-split {
+    height: 100%;
+  }
 
-#app,
-html,
-body,
-.main,
-.demo-split {
-  height: 100%;
-}
-.ivu-layout-content {
-  height: fit-content;
-}
-.question-fliter-head {
-  font-size: 13px;
-  margin: 10px 20px;
-  min-width: 40px;
-}
-.question-fliter-item {
-  margin: 0 5px;
-}
-.question-fliter {
-  display: flex;
-  align-items: center;
-}
-.ivu-layout {
-  background: #fff;
-}
+  .ivu-layout-content {
+    height: fit-content;
+  }
+
+  .question-fliter-head {
+    font-size: 13px;
+    margin: 10px 20px;
+    min-width: 40px;
+  }
+
+  .question-fliter-item {
+    margin: 0 5px;
+  }
+
+  .question-fliter {
+    display: flex;
+    align-items: center;
+  }
+
+  .ivu-layout {
+    background: #fff;
+  }
+
+  /* 搞定左边的显示 */
+  .ivu-collapse-header {
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+  }
+
+  .question-header {
+    flex: 1;
+  }
+
+  .v-note-wrapper {
+    min-width: 0 !important;
+    min-height: 0 !important;
+  }
+
+  .v-note-wrapper .v-note-panel .v-note-show .v-show-content {
+    background: #fff !important;
+  }
+
+  .v-note-wrapper .v-note-panel {
+    border: 0px !important;
+  }
+
+  .question-detail {
+    flex: 1;
+  }
+
+  .v-note-wrapper {
+    z-index: 20 !important;
+  }
 </style>
