@@ -42,8 +42,14 @@
         this.$router.push('/login')
       }
     },
+    methods:{
+      home_1(){
+        console.log("点击主页");
+        this.$router.push("/home_page");
+      }
+    },
     mounted() {
-      this.per_name = sessionStorage.getItem("per_name")
+      this.per_name = sessionStorage.getItem("per_name"),
     }
   }
 </script>
