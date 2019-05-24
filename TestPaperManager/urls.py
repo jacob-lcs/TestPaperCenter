@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'delete_question$', views.delete_question),
     url(r'upload_excel$', views.upload_excel),
     url(r'upload_image$', views.upload_image),
+    url(r'get_question_all_content$', views.get_question_all_content),
     # zlm's
     url(r'search_question$', views.search_questions),
     url(r'query_school$', views.query_school),

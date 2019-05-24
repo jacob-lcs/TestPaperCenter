@@ -281,6 +281,17 @@ export default {
   },
   mounted() {
     let that = this;
+
+    // 路径保护
+    if (
+      sessionStorage.getItem("per_name") === null ||
+      sessionStorage.getItem("identity") === "keyboarder"
+    ) {
+      this.$router.push("/");
+    } else {
+      console.log(sessionStorage.getItem("per_name"));
+    }
+
     //  获取知识点列表
     console.log("params:", this.$route.params);
     this.paperInfo = {

@@ -1,5 +1,43 @@
 <template>
   <div>
+    <!--  试题详情dialog  -->
+    <Modal
+      v-model="quesion_content_show"
+      title="试题详情"
+      :mask-closable="false">
+      <Form :model="question_content_detail" label-position="left" :label-width="100">
+        <FormItem label="试题内容">
+          <Input v-model="question_content_detail.stem" readonly></Input>
+        </FormItem>
+        <FormItem label="试题内容">
+          <Input v-model="question_content_detail.options" readonly></Input>
+        </FormItem>
+        <FormItem label="试题答案">
+          <Input v-model="question_content_detail.answer" readonly></Input>
+        </FormItem>
+        <FormItem label="试题难度">
+          <Input v-model="question_content_detail.difficulty" readonly></Input>
+        </FormItem>
+        <FormItem label="试题名称">
+          <Input v-model="question_content_detail.paper" readonly></Input>
+        </FormItem>
+        <FormItem label="试题类型">
+          <Input v-model="question_content_detail.type" readonly></Input>
+        </FormItem>
+        <FormItem label="学校">
+          <Input v-model="question_content_detail.school" readonly></Input>
+        </FormItem>
+        <FormItem label="年份">
+          <Input v-model="question_content_detail.year" readonly></Input>
+        </FormItem>
+        <FormItem label="科目">
+          <Input v-model="question_content_detail.subject" readonly></Input>
+        </FormItem>
+        <FormItem label="年级">
+          <Input v-model="question_content_detail.grade" readonly></Input>
+        </FormItem>
+      </Form>
+    </Modal>
     <!--  添加试题dialog  -->
     <Modal v-model="modal12" scrollable title="创建试题" width="90vw">
 
@@ -31,11 +69,13 @@
             <Option v-for="item in grade_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
           <!--  科目选择器  -->
-          <Select v-model="paper_subject" style="width:200px;margin-right: 10px" transfer placeholder="请选择科目" @on-change="subject_change">
+          <Select v-model="paper_subject" style="width:200px;margin-right: 10px" transfer placeholder="请选择科目"
+                  @on-change="subject_change">
             <Option v-for="item in subject_list" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
           <!--  题型选择器  -->
-          <Select v-model="topic" style="width:200px;margin-right: 10px" @on-change="topic_change" transfer placeholder="请选择题目类型">
+          <Select v-model="topic" style="width:200px;margin-right: 10px" @on-change="topic_change" transfer
+                  placeholder="请选择题目类型">
             <Option v-for="item in topicList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
           <!--  试题难度选择器  -->
@@ -265,6 +305,7 @@
       return {
         paper_name: '',  // 试卷名称
         paper_year: '',  // 试卷年份
+        per_name: '',
         paper_subject: '', // 已经选择的试卷科目
         subject_list: [],  // 科目选择器的科目列表
         modal12: false,  // 导入试题对话框显示标志位
@@ -303,20 +344,33 @@
             align: 'center',
             render: (h, params) => {
               return h('div', [
-                // h('Button', {
-                //   props: {
-                //     type: 'primary',
-                //     size: 'small'
-                //   },
-                //   style: {
-                //     marginRight: '5px'
-                //   },
-                //   on: {
-                //     click: () => {
-                //       console.log(params)
-                //     }
-                //   }
-                // }, 'View'),
+                h('Button', {
+                  props: {
+                    type: 'primary',
+                    size: 'small'
+                  },
+                  style: {
+                    marginRight: '5px'
+                  },
+                  on: {
+                    click: () => {
+                      let that = this;
+                      console.log(params);
+                      $.ajax({
+                        url: that.$site + "api/get_question_all_content",
+                        dataType: "json",
+                        data: {
+                          question_id: params['row'].id,
+                        },
+                        success: function (data) {
+                          console.log(data);
+                          that.quesion_content_show = true;
+                          that.question_content_detail = data;
+                        }
+                      });
+                    }
+                  }
+                }, 'View'),
                 h('Button', {
                   props: {
                     type: 'error',
@@ -364,7 +418,7 @@
         data_count: 0,  // 数据总数
         page_count: 30,  // 一页显示的数据数量
         current_page: 1, // 当前页码
-        true_answer: '',
+        true_answer: '',  // 答案
         toolbars: {
           bold: true, // 粗体
           italic: true, // 斜体
@@ -398,7 +452,20 @@
           /* 2.2.1 */
           subfield: true, // 单双栏模式
           preview: true, // 预览
-        }
+        },  // Markdown编辑器显示的工具
+        question_content_detail: {
+          stem: "",
+          answer: "",
+          difficulty: "",
+          paper: "",
+          type: "",
+          grade: "",
+          options: "",
+          school: "",
+          subject: "",
+          year: ""
+        },  // 点击view查看试题的所有详情
+        quesion_content_show: false
       }
     },
     methods: {
@@ -778,7 +845,6 @@
 
       },
 
-
       // 日期选择器改变
       select_year_change(year) {
         this.paper_year = year;
@@ -968,18 +1034,20 @@
         }, function (e) {
           console.log(e)
         })
-      }
+      },
+
 
     },
 
     mounted() {
       let that = this;
       // 路径保护
-      // if (sessionStorage.getItem('per_name') == null) {
-      //   this.$router.push("/")
-      // } else {
-      //   console.log(sessionStorage.getItem('per_name'))
-      // }
+      if (sessionStorage.getItem('per_name') === null) {
+        this.$router.push("/")
+      } else {
+        console.log(sessionStorage.getItem('per_name'))
+        this.per_name = sessionStorage.getItem('per_name')
+      }
 
       //  获取题目难度列表
       $.ajax({

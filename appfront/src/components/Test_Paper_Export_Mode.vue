@@ -206,6 +206,12 @@ export default {
     };
   },
   mounted() {
+    // 路径保护
+      if (sessionStorage.getItem('per_name') === null || sessionStorage.getItem('identity') === 'keyboarder') {
+        this.$router.push("/")
+      } else {
+        console.log(sessionStorage.getItem('per_name'))
+      }
     // 查询学科
     this.$axios
       .get(this.$site + "api/query_subjects")
