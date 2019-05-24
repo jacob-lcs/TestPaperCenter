@@ -1,10 +1,12 @@
 <template>
-  <div style="background-color: ">
+  <div>
   <Menu mode="horizontal" :theme="theme1" active-name="1" >
+
     <MenuItem name="1" style="font-size: 15px">
       <Icon type="md-home"/>
       主页
     </MenuItem>
+
     <MenuItem name="2" style="font-size: 15px">
       <Icon type="ios-paper"/>
       试题导出
@@ -28,12 +30,18 @@
     name: "my-header",
     data() {
       return{
-        theme1:'light'
+        theme1:'dark'
       }
       per_name = ''
     },
+    methods:{
+      home_1(){
+        console.log("点击主页");
+        this.$router.push("/home_page");
+      }
+    },
     mounted() {
-      this.per_name = sessionStorage.getItem("per_name")
+      this.per_name = sessionStorage.getItem("per_name"),
     }
   }
 </script>
