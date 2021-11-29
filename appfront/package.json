@@ -19,7 +19,7 @@
     "hydrogen-js-sdk": "^1.7.0",
     "iview": "^3.3.3",
     "marked": "^0.7.0",
-    "mavon-editor": "^2.7.3",
+    "mavon-editor": "^2.8.2",
     "vue": "^2.6.10",
     "vue-clipboard2": "^0.3.0",
     "vue-resource": "^1.5.1",
